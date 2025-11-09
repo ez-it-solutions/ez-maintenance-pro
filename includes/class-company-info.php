@@ -169,7 +169,27 @@ class EZIT_Company_Info {
                         <?php else: ?>
                             <div class="ezit-plugins-list">
                                 <?php foreach ($plugins as $plugin): ?>
-                                    <div class="ezit-plugin-item <?php echo $plugin['active'] ? 'active' : 'inactive'; ?>">
+                                    <?php
+                                    // Determine dashboard URL based on plugin slug
+                                    $dashboard_url = '';
+                                    $settings_url = '';
+                                    
+                                    if (strpos($plugin['slug'], 'ez-it-client-manager') !== false) {
+                                        $dashboard_url = admin_url('admin.php?page=ez-it-client-manager');
+                                        $settings_url = admin_url('admin.php?page=ez-it-client-manager&tab=settings');
+                                    } elseif (strpos($plugin['slug'], 'ez-maintenance-pro') !== false) {
+                                        $dashboard_url = admin_url('admin.php?page=ez-maintenance-pro');
+                                        $settings_url = admin_url('admin.php?page=ez-maintenance-pro&tab=settings');
+                                    } elseif (strpos($plugin['slug'], 'ez-dh-sso') !== false) {
+                                        $dashboard_url = admin_url('admin.php?page=ez-dh-sso');
+                                        $settings_url = admin_url('admin.php?page=ez-dh-sso&tab=settings');
+                                    }
+                                    ?>
+                                    <div class="ezit-plugin-item <?php echo $plugin['active'] ? 'active' : 'inactive'; ?>" 
+                                         <?php if ($dashboard_url): ?>
+                                         onclick="window.location.href='<?php echo esc_url($dashboard_url); ?>'" 
+                                         style="cursor: pointer;"
+                                         <?php endif; ?>>
                                         <div class="ezit-plugin-header">
                                             <h3><?php echo esc_html($plugin['name']); ?></h3>
                                             <span class="ezit-plugin-version">v<?php echo esc_html($plugin['version']); ?></span>
@@ -180,6 +200,21 @@ class EZIT_Company_Info {
                                             <?php endif; ?>
                                         </div>
                                         <p><?php echo esc_html($plugin['description']); ?></p>
+                                        
+                                        <?php if ($dashboard_url || $settings_url): ?>
+                                        <div class="ezit-plugin-actions">
+                                            <?php if ($dashboard_url): ?>
+                                                <a href="<?php echo esc_url($dashboard_url); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
+                                                    <span class="dashicons dashicons-dashboard"></span> Dashboard
+                                                </a>
+                                            <?php endif; ?>
+                                            <?php if ($settings_url): ?>
+                                                <a href="<?php echo esc_url($settings_url); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
+                                                    <span class="dashicons dashicons-admin-settings"></span> Settings
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -431,11 +466,64 @@ class EZIT_Company_Info {
                 padding: 15px;
                 margin-bottom: 15px;
                 background: #f9f9f9;
+                border-left: 4px solid #a3e635;
+                transition: all 0.2s ease;
+            }
+            
+            .ezit-plugin-item[style*="cursor: pointer"]:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(163, 230, 53, 0.2);
+                border-left-width: 6px;
             }
             
             .ezit-dark .ezit-plugin-item {
                 background: #0f1419;
                 border-color: #2d3748;
+            }
+            
+            .ezit-plugin-actions {
+                display: flex;
+                gap: 10px;
+                margin-top: 12px;
+                padding-top: 12px;
+                border-top: 1px solid rgba(163, 230, 53, 0.2);
+            }
+            
+            .ezit-plugin-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                background: transparent;
+                border: 1px solid #a3e635;
+                border-radius: 4px;
+                color: #a3e635;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 600;
+                transition: all 0.2s ease;
+            }
+            
+            .ezit-plugin-link:hover {
+                background: #a3e635;
+                color: #0b0f12;
+                transform: translateY(-1px);
+            }
+            
+            .ezit-plugin-link .dashicons {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+            }
+            
+            .ezit-light .ezit-plugin-link {
+                border-color: #16a34a;
+                color: #16a34a;
+            }
+            
+            .ezit-light .ezit-plugin-link:hover {
+                background: #16a34a;
+                color: white;
             }
             
             .ezit-plugin-item.active {
