@@ -127,10 +127,18 @@ class EZIT_Company_Info {
      * Made public static so it can be called as callback
      */
     public static function render_page() {
+        // Hide admin notices
+        remove_all_actions('admin_notices');
+        remove_all_actions('all_admin_notices');
+        
+        // Get theme mode from either plugin
+        $theme_mode = get_option('ezit_cm_theme', get_option('ezmp_theme_mode', 'dark'));
+        $theme_class = $theme_mode === 'light' ? 'ezit-light' : 'ezit-dark';
+        
         $info = self::get_info();
         $plugins = self::get_installed_plugins();
         ?>
-        <div class="ezit-company-info-page">
+        <div class="ezit-company-info-page <?php echo esc_attr($theme_class); ?>" data-theme="<?php echo esc_attr($theme_mode); ?>">
             <div class="ezit-company-header">
                 <?php if (!empty($info['logo'])): ?>
                     <img src="<?php echo esc_url($info['logo']); ?>" alt="<?php echo esc_attr($info['name']); ?>" class="ezit-company-logo">
@@ -266,6 +274,11 @@ class EZIT_Company_Info {
                 color: white;
             }
             
+            .ezit-light .ezit-company-header {
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                color: #0c4a6e;
+            }
+            
             .ezit-company-logo {
                 max-width: 200px;
                 margin-bottom: 20px;
@@ -275,6 +288,10 @@ class EZIT_Company_Info {
                 margin: 0 0 10px;
                 font-size: 2.5rem;
                 color: #a3e635;
+            }
+            
+            .ezit-light .ezit-company-header h1 {
+                color: #16a34a;
             }
             
             .ezit-tagline {
@@ -306,6 +323,12 @@ class EZIT_Company_Info {
                 box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             }
             
+            .ezit-dark .ezit-card {
+                background: #1a2332;
+                border-color: #2d3748;
+                color: #e2e8f0;
+            }
+            
             .ezit-card h2 {
                 margin-top: 0;
                 color: #0b0f12;
@@ -313,9 +336,18 @@ class EZIT_Company_Info {
                 padding-bottom: 10px;
             }
             
+            .ezit-dark .ezit-card h2 {
+                color: #f1f5f9;
+                border-bottom-color: #a3e635;
+            }
+            
             .ezit-card h3 {
                 margin-top: 0;
                 color: #0b0f12;
+            }
+            
+            .ezit-dark .ezit-card h3 {
+                color: #f1f5f9;
             }
             
             .ezit-contact-info p {
@@ -332,6 +364,11 @@ class EZIT_Company_Info {
                 padding: 15px;
                 margin-bottom: 15px;
                 background: #f9f9f9;
+            }
+            
+            .ezit-dark .ezit-plugin-item {
+                background: #0f1419;
+                border-color: #2d3748;
             }
             
             .ezit-plugin-item.active {
