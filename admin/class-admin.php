@@ -179,6 +179,45 @@ class EZMP_Admin {
         if ($screen && $screen->id === 'ez-it-solutions_page_ez-it-solutions') {
             remove_all_actions('admin_notices');
             remove_all_actions('all_admin_notices');
+            
+            // Inject CSS to hide notices
+            add_action('admin_print_styles', function() {
+                echo '<style>
+                    .notice, .updated, .error, .update-nag,
+                    div[class*="notice"], div[id*="notice"],
+                    #wpbody-content > .notice,
+                    #wpbody-content > .updated,
+                    #wpbody-content > .error {
+                        display: none !important;
+                    }
+                </style>';
+            });
+            
+            // JavaScript to remove notices
+            add_action('admin_footer', function() {
+                ?>
+                <script>
+                (function() {
+                    function removeNotices() {
+                        var selectors = ['.notice', '.updated', '.error', '.update-nag', 'div[class*="notice"]', 'div[id*="notice"]'];
+                        selectors.forEach(function(selector) {
+                            document.querySelectorAll(selector).forEach(function(el) {
+                                if (!el.closest('.ezit-fullpage') && !el.closest('.ezit-company-info-page')) {
+                                    el.remove();
+                                }
+                            });
+                        });
+                    }
+                    removeNotices();
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', removeNotices);
+                    }
+                    window.addEventListener('load', removeNotices);
+                    new MutationObserver(removeNotices).observe(document.body, {childList: true, subtree: true});
+                })();
+                </script>
+                <?php
+            });
         }
     }
     
