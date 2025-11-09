@@ -536,9 +536,18 @@ class EZIT_Company_Info {
             }
             
             .ezit-plugin-item[style*="cursor: pointer"]:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(163, 230, 53, 0.2);
-                border-left-width: 6px;
+                background: rgba(163, 230, 53, 0.05);
+                border-color: #a3e635;
+            }
+            
+            .ezit-dark .ezit-plugin-item[style*="cursor: pointer"]:hover {
+                background: rgba(163, 230, 53, 0.08);
+                border-color: #a3e635;
+            }
+            
+            .ezit-light .ezit-plugin-item[style*="cursor: pointer"]:hover {
+                background: rgba(22, 163, 74, 0.05);
+                border-color: #16a34a;
             }
             
             .ezit-dark .ezit-plugin-item {
