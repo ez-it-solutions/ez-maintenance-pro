@@ -24,6 +24,7 @@ class EZMP_Admin {
         add_action('admin_menu', [$this, 'add_admin_menu']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
         add_action('in_admin_header', [$this, 'hide_admin_notices'], 1000);
+        add_action('in_admin_header', [$this, 'hide_company_info_notices'], 1000);
         add_filter('plugin_action_links_' . EZMP_PLUGIN_BASENAME, [$this, 'add_action_links']);
         add_action('admin_bar_menu', [$this, 'add_admin_bar_menu'], 100);
     }
@@ -165,6 +166,17 @@ class EZMP_Admin {
     public function hide_admin_notices() {
         $screen = get_current_screen();
         if ($screen && strpos($screen->id, 'ez-maintenance-pro') !== false) {
+            remove_all_actions('admin_notices');
+            remove_all_actions('all_admin_notices');
+        }
+    }
+    
+    /**
+     * Hide admin notices on company info page
+     */
+    public function hide_company_info_notices() {
+        $screen = get_current_screen();
+        if ($screen && $screen->id === 'ez-it-solutions_page_ez-it-solutions') {
             remove_all_actions('admin_notices');
             remove_all_actions('all_admin_notices');
         }

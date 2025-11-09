@@ -127,10 +127,6 @@ class EZIT_Company_Info {
      * Made public static so it can be called as callback
      */
     public static function render_page() {
-        // Hide admin notices
-        remove_all_actions('admin_notices');
-        remove_all_actions('all_admin_notices');
-        
         // Get theme mode from either plugin
         $theme_mode = get_option('ezit_cm_theme', get_option('ezmp_theme_mode', 'dark'));
         $theme_class = $theme_mode === 'light' ? 'ezit-light' : 'ezit-dark';
@@ -138,7 +134,8 @@ class EZIT_Company_Info {
         $info = self::get_info();
         $plugins = self::get_installed_plugins();
         ?>
-        <div class="ezit-company-info-page <?php echo esc_attr($theme_class); ?>" data-theme="<?php echo esc_attr($theme_mode); ?>">
+        <div class="ezit-fullpage <?php echo esc_attr($theme_class); ?>" id="ezit-company-wrap" data-theme="<?php echo esc_attr($theme_mode); ?>">
+        <div class="ezit-company-info-page">
             <div class="ezit-company-header">
                 <?php if (!empty($info['logo'])): ?>
                     <img src="<?php echo esc_url($info['logo']); ?>" alt="<?php echo esc_attr($info['name']); ?>" class="ezit-company-logo">
@@ -259,10 +256,45 @@ class EZIT_Company_Info {
         </div>
         
         <style>
+            /* Full page wrapper */
+            .ezit-fullpage {
+                position: fixed;
+                top: 32px;
+                left: 160px;
+                right: 0;
+                bottom: 0;
+                overflow-y: auto;
+                padding: 20px;
+                transition: background-color 0.3s ease;
+            }
+            
+            .ezit-dark {
+                background-color: #0b0f12;
+                color: #e2e8f0;
+            }
+            
+            .ezit-light {
+                background-color: #f9fafb;
+                color: #1f2937;
+            }
+            
+            @media screen and (max-width: 960px) {
+                .ezit-fullpage {
+                    left: 36px;
+                }
+            }
+            
+            @media screen and (max-width: 782px) {
+                .ezit-fullpage {
+                    top: 46px;
+                    left: 0;
+                }
+            }
+            
             .ezit-company-info-page {
                 max-width: 1400px;
-                margin: 20px auto;
-                padding: 0 20px;
+                margin: 0 auto;
+                padding: 0;
             }
             
             .ezit-company-header {
@@ -505,6 +537,7 @@ class EZIT_Company_Info {
         });
         </script>
         <?php
+        echo '</div>'; // Close ezit-fullpage wrapper
     }
 }
 
