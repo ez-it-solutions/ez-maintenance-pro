@@ -247,7 +247,8 @@ class EZMP_Admin {
         ]);
         
         // Only enqueue full admin assets on plugin pages
-        if (strpos($hook, 'ez-maintenance-pro') === false) {
+        if (strpos($hook, 'ez-maintenance-pro') === false && 
+            strpos($hook, 'ez-it-solutions_page_ez-maintenance-pro') === false) {
             return;
         }
         
