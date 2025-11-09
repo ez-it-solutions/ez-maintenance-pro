@@ -32,56 +32,15 @@ class EZMP_Admin {
      * Add admin menu
      */
     public function add_admin_menu() {
-        // Use the same parent slug as Ez IT Client Manager
-        $parent_slug = 'ez-it-solutions';
-        
-        // Check if parent menu already exists (from Ez IT Client Manager or other Ez IT plugins)
-        global $menu;
-        $parent_exists = false;
-        
-        foreach ($menu as $item) {
-            if (isset($item[2]) && $item[2] === $parent_slug) {
-                $parent_exists = true;
-                break;
-            }
-        }
-        
-        // Create parent menu if it doesn't exist
-        if (!$parent_exists) {
-            // Use a simple callback that checks if class exists
-            $callback = class_exists('EZIT_Company_Info') ? ['EZIT_Company_Info', 'render_page'] : '__return_null';
-            
-            add_menu_page(
-                'Ez IT Solutions',
-                'Ez IT Solutions',
-                'manage_options',
-                $parent_slug,
-                $callback,
-                'dashicons-admin-site-alt3',
-                3
-            );
-            
-            // Add Company Info as first submenu (replaces duplicate parent)
-            if (class_exists('EZIT_Company_Info')) {
-                add_submenu_page(
-                    $parent_slug,
-                    'Company Info',
-                    'Company Info',
-                    'manage_options',
-                    $parent_slug,
-                    ['EZIT_Company_Info', 'render_page']
-                );
-            }
-        }
-        
-        // Add as submenu under Ez IT Solutions
-        add_submenu_page(
-            $parent_slug,
+        // Register as standalone menu for now
+        add_menu_page(
             'Ez Maintenance Pro',
-            'Maintenance Pro',
+            'Ez Maintenance',
             'manage_options',
             'ez-maintenance-pro',
-            [$this, 'render_admin_page']
+            [$this, 'render_admin_page'],
+            'dashicons-admin-tools',
+            3
         );
     }
     
