@@ -32,15 +32,39 @@ class EZMP_Admin {
      * Add admin menu
      */
     public function add_admin_menu() {
-        // Register as standalone menu for now
-        add_menu_page(
+        $parent_slug = 'ez-it-solutions';
+        
+        // Check if parent menu exists
+        global $menu;
+        $parent_exists = false;
+        foreach ($menu as $item) {
+            if (isset($item[2]) && $item[2] === $parent_slug) {
+                $parent_exists = true;
+                break;
+            }
+        }
+        
+        // Create parent menu if needed
+        if (!$parent_exists) {
+            add_menu_page(
+                'Ez IT Solutions',
+                'Ez IT Solutions',
+                'manage_options',
+                $parent_slug,
+                '__return_null',
+                'dashicons-admin-site-alt3',
+                3
+            );
+        }
+        
+        // Add Maintenance Pro as submenu
+        add_submenu_page(
+            $parent_slug,
             'Ez Maintenance Pro',
-            'Ez Maintenance',
+            'Maintenance Pro',
             'manage_options',
             'ez-maintenance-pro',
-            [$this, 'render_admin_page'],
-            'dashicons-admin-tools',
-            3
+            [$this, 'render_admin_page']
         );
     }
     
