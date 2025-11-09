@@ -86,7 +86,7 @@ class EZIT_Company_Info {
     }
     
     /**
-     * Get installed Ez IT plugins
+     * Get installed Ez IT plugins with auto-detected admin pages
      */
     public static function get_installed_plugins() {
         if (!function_exists('get_plugins')) {
@@ -102,18 +102,99 @@ class EZIT_Company_Info {
                 stripos($plugin_data['Author'], 'Ez IT Solutions') !== false ||
                 stripos($plugin_data['AuthorURI'], 'ez-it-solutions.com') !== false) {
                 
+                // Auto-detect admin page slug from plugin file
+                $plugin_slug = dirname($plugin_file);
+                if ($plugin_slug === '.') {
+                    $plugin_slug = basename($plugin_file, '.php');
+                }
+                
+                // Try to find registered admin pages for this plugin
+                $admin_pages = self::find_plugin_admin_pages($plugin_slug, $plugin_data['Name']);
+                
                 $ezit_plugins[] = [
                     'name' => $plugin_data['Name'],
                     'version' => $plugin_data['Version'],
                     'description' => $plugin_data['Description'],
                     'author' => $plugin_data['Author'],
                     'active' => is_plugin_active($plugin_file),
-                    'file' => $plugin_file
+                    'file' => $plugin_file,
+                    'slug' => $plugin_slug,
+                    'dashboard_url' => $admin_pages['dashboard'] ?? '',
+                    'settings_url' => $admin_pages['settings'] ?? ''
                 ];
             }
         }
         
         return $ezit_plugins;
+    }
+    
+    /**
+     * Find admin pages registered by a plugin
+     */
+    private static function find_plugin_admin_pages($plugin_slug, $plugin_name) {
+        global $menu, $submenu;
+        
+        $pages = [
+            'dashboard' => '',
+            'settings' => ''
+        ];
+        
+        // Common page slug patterns to check
+        $slug_patterns = [
+            $plugin_slug,
+            str_replace('_', '-', $plugin_slug),
+            str_replace('-', '_', $plugin_slug),
+            sanitize_title($plugin_name)
+        ];
+        
+        // Check main menu
+        if (!empty($menu)) {
+            foreach ($menu as $item) {
+                if (isset($item[2])) {
+                    foreach ($slug_patterns as $pattern) {
+                        if (stripos($item[2], $pattern) !== false) {
+                            $pages['dashboard'] = admin_url('admin.php?page=' . $item[2]);
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Check submenus under Ez IT Solutions parent
+        if (!empty($submenu['ez-it-solutions'])) {
+            foreach ($submenu['ez-it-solutions'] as $item) {
+                if (isset($item[2])) {
+                    foreach ($slug_patterns as $pattern) {
+                        if (stripos($item[2], $pattern) !== false && stripos($item[2], 'ez-it-solutions') === false) {
+                            $pages['dashboard'] = admin_url('admin.php?page=' . $item[2]);
+                            // Settings is typically dashboard + &tab=settings
+                            $pages['settings'] = admin_url('admin.php?page=' . $item[2] . '&tab=settings');
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Check all submenus if not found yet
+        if (empty($pages['dashboard']) && !empty($submenu)) {
+            foreach ($submenu as $parent => $items) {
+                foreach ($items as $item) {
+                    if (isset($item[2])) {
+                        foreach ($slug_patterns as $pattern) {
+                            if (stripos($item[2], $pattern) !== false) {
+                                $pages['dashboard'] = admin_url('admin.php?page=' . $item[2]);
+                                $pages['settings'] = admin_url('admin.php?page=' . $item[2] . '&tab=settings');
+                                break 3;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $pages;
     }
     
     /**
@@ -169,25 +250,9 @@ class EZIT_Company_Info {
                         <?php else: ?>
                             <div class="ezit-plugins-list">
                                 <?php foreach ($plugins as $plugin): ?>
-                                    <?php
-                                    // Determine dashboard URL based on plugin slug
-                                    $dashboard_url = '';
-                                    $settings_url = '';
-                                    
-                                    if (strpos($plugin['slug'], 'ez-it-client-manager') !== false) {
-                                        $dashboard_url = admin_url('admin.php?page=ez-it-client-manager');
-                                        $settings_url = admin_url('admin.php?page=ez-it-client-manager&tab=settings');
-                                    } elseif (strpos($plugin['slug'], 'ez-maintenance-pro') !== false) {
-                                        $dashboard_url = admin_url('admin.php?page=ez-maintenance-pro');
-                                        $settings_url = admin_url('admin.php?page=ez-maintenance-pro&tab=settings');
-                                    } elseif (strpos($plugin['slug'], 'ez-dh-sso') !== false) {
-                                        $dashboard_url = admin_url('admin.php?page=ez-dh-sso');
-                                        $settings_url = admin_url('admin.php?page=ez-dh-sso&tab=settings');
-                                    }
-                                    ?>
                                     <div class="ezit-plugin-item <?php echo $plugin['active'] ? 'active' : 'inactive'; ?>" 
-                                         <?php if ($dashboard_url): ?>
-                                         onclick="window.location.href='<?php echo esc_url($dashboard_url); ?>'" 
+                                         <?php if (!empty($plugin['dashboard_url'])): ?>
+                                         onclick="window.location.href='<?php echo esc_url($plugin['dashboard_url']); ?>'" 
                                          style="cursor: pointer;"
                                          <?php endif; ?>>
                                         <div class="ezit-plugin-header">
@@ -201,15 +266,15 @@ class EZIT_Company_Info {
                                         </div>
                                         <p><?php echo esc_html($plugin['description']); ?></p>
                                         
-                                        <?php if ($dashboard_url || $settings_url): ?>
+                                        <?php if (!empty($plugin['dashboard_url']) || !empty($plugin['settings_url'])): ?>
                                         <div class="ezit-plugin-actions">
-                                            <?php if ($dashboard_url): ?>
-                                                <a href="<?php echo esc_url($dashboard_url); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
+                                            <?php if (!empty($plugin['dashboard_url'])): ?>
+                                                <a href="<?php echo esc_url($plugin['dashboard_url']); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
                                                     <span class="dashicons dashicons-dashboard"></span> Dashboard
                                                 </a>
                                             <?php endif; ?>
-                                            <?php if ($settings_url): ?>
-                                                <a href="<?php echo esc_url($settings_url); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
+                                            <?php if (!empty($plugin['settings_url'])): ?>
+                                                <a href="<?php echo esc_url($plugin['settings_url']); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
                                                     <span class="dashicons dashicons-admin-settings"></span> Settings
                                                 </a>
                                             <?php endif; ?>
