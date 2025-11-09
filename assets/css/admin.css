@@ -1,5 +1,41 @@
 /* Ez IT Solutions - Maintenance Pro - Modern Admin Styles */
 
+/* Full Page Wrapper */
+.ezmp-fullpage {
+    position: fixed;
+    top: 32px;
+    left: 160px;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 20px;
+    transition: background-color 0.3s ease;
+    z-index: 9999;
+}
+
+.ezmp-dark {
+    background-color: #0b0f12;
+    color: #e2e8f0;
+}
+
+.ezmp-light {
+    background-color: #f9fafb;
+    color: #1f2937;
+}
+
+@media screen and (max-width: 960px) {
+    .ezmp-fullpage {
+        left: 36px;
+    }
+}
+
+@media screen and (max-width: 782px) {
+    .ezmp-fullpage {
+        top: 46px;
+        left: 0;
+    }
+}
+
 /* Replace ezit with ezmp throughout */
 .ezmp-wrap { 
     padding: 20px; 
