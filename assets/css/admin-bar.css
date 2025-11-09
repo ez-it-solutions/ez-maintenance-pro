@@ -37,17 +37,18 @@
 
 /* Toggle Container */
 .ezmp-admin-bar-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    padding: 0;
-    min-width: 200px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 15px !important;
+    padding: 0 !important;
+    min-width: 200px !important;
 }
 
 .ezmp-toggle-label {
-    flex: 1;
-    white-space: nowrap;
+    flex: 1 !important;
+    white-space: nowrap !important;
+    color: #e2e8f0 !important;
 }
 
 /* Toggle Switch */
@@ -100,19 +101,30 @@
 
 /* Prevent default link behavior on toggle item */
 #wpadminbar .ezmp-admin-bar-toggle-item {
-    cursor: default;
+    cursor: default !important;
 }
 
 #wpadminbar .ezmp-admin-bar-toggle-item > .ab-item {
-    padding: 0 12px;
-    height: auto;
-    line-height: normal;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding: 0 12px !important;
+    height: auto !important;
+    line-height: normal !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    display: block !important;
 }
 
 #wpadminbar .ezmp-admin-bar-toggle-item:hover > .ab-item {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(163, 230, 53, 0.15) !important;
+}
+
+/* Force toggle to display properly */
+#wpadminbar #wp-admin-bar-ezmp-toggle .ab-item {
+    padding: 8px 12px !important;
+}
+
+#wpadminbar #wp-admin-bar-ezmp-toggle .ab-item > span {
+    display: flex !important;
+    align-items: center !important;
 }
 
 /* Fix submenu width */
