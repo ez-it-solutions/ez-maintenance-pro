@@ -256,6 +256,17 @@ class EZIT_Company_Info {
         </div>
         
         <style>
+            /* Hide all admin notices on company info page */
+            #ezit-company-wrap ~ .notice,
+            #ezit-company-wrap ~ .updated,
+            #ezit-company-wrap ~ .error,
+            #ezit-company-wrap ~ div[class*="notice"],
+            .ezit-fullpage .notice,
+            .ezit-fullpage .updated,
+            .ezit-fullpage .error {
+                display: none !important;
+            }
+            
             /* Full page wrapper */
             .ezit-fullpage {
                 position: fixed;
