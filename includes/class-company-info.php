@@ -247,7 +247,7 @@ class EZIT_Company_Info {
                             </tr>
                         </table>
                         
-                        <button type="button" class="button" id="ezit-refresh-info" style="margin-top: 15px; width: 100%;">
+                        <button type="button" class="ezit-refresh-btn" id="ezit-refresh-info">
                             <span class="dashicons dashicons-update"></span> Refresh Info
                         </button>
                     </div>
@@ -386,6 +386,24 @@ class EZIT_Company_Info {
                 margin: 10px 0;
             }
             
+            .ezit-contact-info a {
+                color: #a3e635;
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+            
+            .ezit-contact-info a:hover {
+                color: #84cc16;
+            }
+            
+            .ezit-light .ezit-contact-info a {
+                color: #16a34a;
+            }
+            
+            .ezit-light .ezit-contact-info a:hover {
+                color: #15803d;
+            }
+            
             .ezit-plugins-list {
                 margin-top: 20px;
             }
@@ -461,14 +479,24 @@ class EZIT_Company_Info {
                 align-items: center;
                 gap: 8px;
                 text-decoration: none;
-                color: #0073aa;
+                color: #a3e635;
                 padding: 8px;
                 border-radius: 4px;
-                transition: background 0.2s;
+                transition: all 0.2s;
             }
             
             .ezit-quick-links a:hover {
-                background: #f0f0f0;
+                background: rgba(163, 230, 53, 0.1);
+                color: #84cc16;
+            }
+            
+            .ezit-light .ezit-quick-links a {
+                color: #16a34a;
+            }
+            
+            .ezit-light .ezit-quick-links a:hover {
+                background: rgba(22, 163, 74, 0.1);
+                color: #15803d;
             }
             
             .ezit-social-links {
@@ -483,8 +511,8 @@ class EZIT_Company_Info {
                 justify-content: center;
                 width: 40px;
                 height: 40px;
-                background: #0073aa;
-                color: white;
+                background: #a3e635;
+                color: #0b0f12;
                 border-radius: 50%;
                 text-decoration: none;
                 transition: transform 0.2s, background 0.2s;
@@ -492,7 +520,16 @@ class EZIT_Company_Info {
             
             .ezit-social-link:hover {
                 transform: scale(1.1);
-                background: #005177;
+                background: #84cc16;
+            }
+            
+            .ezit-light .ezit-social-link {
+                background: #16a34a;
+                color: white;
+            }
+            
+            .ezit-light .ezit-social-link:hover {
+                background: #15803d;
             }
             
             .ezit-system-info {
@@ -503,6 +540,53 @@ class EZIT_Company_Info {
             .ezit-system-info td {
                 padding: 8px 0;
                 border-bottom: 1px solid #eee;
+            }
+            
+            .ezit-dark .ezit-system-info td {
+                border-bottom-color: #2d3748;
+            }
+            
+            .ezit-refresh-btn {
+                margin-top: 15px;
+                width: 100%;
+                background: #a3e635;
+                color: #0b0f12;
+                border: none;
+                padding: 10px 16px;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+            
+            .ezit-refresh-btn:hover {
+                background: #84cc16;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(163, 230, 53, 0.3);
+            }
+            
+            .ezit-refresh-btn:active {
+                transform: translateY(0);
+            }
+            
+            .ezit-refresh-btn .dashicons {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+            }
+            
+            .ezit-light .ezit-refresh-btn {
+                background: #16a34a;
+                color: white;
+            }
+            
+            .ezit-light .ezit-refresh-btn:hover {
+                background: #15803d;
+                box-shadow: 0 4px 8px rgba(22, 163, 74, 0.3);
             }
             
             @media screen and (max-width: 1200px) {
