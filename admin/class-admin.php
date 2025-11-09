@@ -31,12 +31,15 @@ class EZMP_Admin {
      * Add admin menu
      */
     public function add_admin_menu() {
-        // Check if Ez IT Solutions parent menu exists
+        // Use the same parent slug as Ez IT Client Manager
+        $parent_slug = 'ez-it-solutions';
+        
+        // Check if parent menu already exists (from Ez IT Client Manager or other Ez IT plugins)
         global $menu;
         $parent_exists = false;
         
         foreach ($menu as $item) {
-            if (isset($item[0]) && $item[0] === 'Ez IT Solutions') {
+            if (isset($item[2]) && $item[2] === $parent_slug) {
                 $parent_exists = true;
                 break;
             }
@@ -48,7 +51,7 @@ class EZMP_Admin {
                 'Ez IT Solutions',
                 'Ez IT Solutions',
                 'manage_options',
-                'ez-it-solutions',
+                $parent_slug,
                 '__return_null',
                 'dashicons-admin-network',
                 3
@@ -57,7 +60,7 @@ class EZMP_Admin {
         
         // Add as submenu under Ez IT Solutions
         add_submenu_page(
-            'ez-it-solutions',
+            $parent_slug,
             'Ez Maintenance Pro',
             'Maintenance Pro',
             'manage_options',
@@ -138,7 +141,7 @@ class EZMP_Admin {
         $current_tab = $_GET['tab'] ?? 'dashboard';
         $theme_mode = get_option('ezmp_theme_mode', 'dark');
         ?>
-        <div class="ezmp-wrap ezmp-<?php echo esc_attr($theme_mode); ?>">
+        <div class="ezmp-fullpage ezmp-<?php echo esc_attr($theme_mode); ?>" id="ezmp-main-wrap" data-theme="<?php echo esc_attr($theme_mode); ?>">
             <div class="ezmp-header">
                 <div class="ezmp-header-content">
                     <h1 class="ezmp-title">
@@ -185,6 +188,14 @@ class EZMP_Admin {
                     <span class="dashicons dashicons-admin-settings"></span>
                     Settings
                 </a>
+            </div>
+            
+            <!-- Loading Modal -->
+            <div id="ezmp-loading-modal" class="ezmp-loading-modal">
+                <div class="ezmp-loading-content">
+                    <div class="ezmp-loading-spinner"></div>
+                    <p>Loading...</p>
+                </div>
             </div>
             
             <div class="ezmp-content-wrapper">

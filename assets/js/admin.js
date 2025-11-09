@@ -17,6 +17,20 @@
         },
         
         /**
+         * Show loading spinner
+         */
+        showLoading: function() {
+            $('#ezmp-loading-modal').addClass('active');
+        },
+        
+        /**
+         * Hide loading spinner
+         */
+        hideLoading: function() {
+            $('#ezmp-loading-modal').removeClass('active');
+        },
+        
+        /**
          * Theme Toggle (Dark/Light Mode)
          */
         themeToggle: function() {
@@ -330,16 +344,23 @@
          * Save Settings via AJAX
          */
         saveSettings: function(settings, successMessage) {
+            EZMP_Admin.showLoading();
+            
             $.post(ezmpAdmin.ajaxurl, {
                 action: 'ezmp_save_settings',
                 nonce: ezmpAdmin.nonce,
                 settings: settings
             }, function(response) {
+                EZMP_Admin.hideLoading();
+                
                 if (response.success) {
                     EZMP_Admin.showNotice(successMessage || 'Settings saved successfully!', 'success');
                 } else {
                     EZMP_Admin.showNotice(response.data.message || 'Error saving settings', 'error');
                 }
+            }).fail(function() {
+                EZMP_Admin.hideLoading();
+                EZMP_Admin.showNotice('Connection error. Please try again.', 'error');
             });
         },
         
