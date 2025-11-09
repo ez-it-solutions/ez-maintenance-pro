@@ -867,6 +867,311 @@ class LicenseApiTest extends TestCase
 
 ---
 
+## Laravel Project Setup
+
+### Step 1: Create Laravel Project
+
+```bash
+composer create-project laravel/laravel ez-licensing
+cd ez-licensing
+```
+
+### Step 2: Configure Database
+
+Edit `.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=ez_licensing
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+
+LICENSING_API_SECRET=generate-random-32-character-string
+APP_URL=https://licensing.ez-it-solutions.com
+```
+
+### Step 3: Create Migrations
+
+```bash
+php artisan make:migration create_licenses_table
+php artisan make:migration create_license_activations_table
+php artisan make:migration create_license_logs_table
+php artisan make:migration create_products_table
+```
+
+**Migration Files:**
+
+**`database/migrations/xxxx_create_licenses_table.php`:**
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('licenses', function (Blueprint $table) {
+            $table->id();
+            $table->string('license_key', 50)->unique();
+            $table->string('email')->index();
+            $table->string('product_id', 50)->index();
+            $table->enum('plan', ['free', 'pro', 'business'])->default('free');
+            $table->enum('status', ['active', 'expired', 'suspended', 'cancelled'])->default('active');
+            $table->integer('max_activations')->default(1);
+            $table->timestamp('expires_at')->nullable();
+            $table->timestamp('last_verified_at')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+            
+            $table->index(['product_id', 'status']);
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('licenses');
+    }
+};
+```
+
+**`database/migrations/xxxx_create_license_activations_table.php`:**
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('license_activations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('license_id')->constrained()->onDelete('cascade');
+            $table->string('site_url');
+            $table->string('site_ip', 45)->nullable();
+            $table->string('wp_version', 20)->nullable();
+            $table->string('plugin_version', 20)->nullable();
+            $table->string('php_version', 20)->nullable();
+            $table->timestamp('activated_at');
+            $table->timestamp('last_checked_at')->nullable();
+            $table->timestamps();
+            
+            $table->unique(['license_id', 'site_url']);
+            $table->index('site_url');
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('license_activations');
+    }
+};
+```
+
+**`database/migrations/xxxx_create_license_logs_table.php`:**
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('license_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('license_id')->constrained()->onDelete('cascade');
+            $table->string('action', 50);
+            $table->string('site_url')->nullable();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('details')->nullable();
+            $table->timestamp('created_at');
+            
+            $table->index(['license_id', 'action']);
+            $table->index('created_at');
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('license_logs');
+    }
+};
+```
+
+**`database/migrations/xxxx_create_products_table.php`:**
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('product_id', 50)->unique();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->boolean('active')->default(true);
+            $table->json('features')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('products');
+    }
+};
+```
+
+### Step 4: Run Migrations
+
+```bash
+php artisan migrate
+```
+
+### Step 5: Create Models
+
+```bash
+php artisan make:model License
+php artisan make:model LicenseActivation
+php artisan make:model LicenseLog
+php artisan make:model Product
+```
+
+Copy the model code from the "Laravel Implementation" section above.
+
+### Step 6: Create Controller
+
+```bash
+php artisan make:controller Api/LicenseController
+```
+
+Copy the controller code from the "Laravel Implementation" section above.
+
+### Step 7: Create Middleware
+
+```bash
+php artisan make:middleware ValidateApiSecret
+```
+
+**`app/Http/Middleware/ValidateApiSecret.php`:**
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+
+class ValidateApiSecret
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $secret = $request->header('X-API-Secret');
+        
+        if ($secret !== config('licensing.api_secret')) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        
+        return $next($request);
+    }
+}
+```
+
+Register in `app/Http/Kernel.php`:
+```php
+protected $middlewareAliases = [
+    // ... other middleware
+    'api.secret' => \App\Http\Middleware\ValidateApiSecret::class,
+];
+```
+
+### Step 8: Create Config File
+
+**`config/licensing.php`:**
+```php
+<?php
+
+return [
+    'api_secret' => env('LICENSING_API_SECRET', 'your-secret-key-here'),
+    
+    'plans' => [
+        'free' => [
+            'name' => 'Free',
+            'price' => 0,
+            'max_activations' => 1,
+        ],
+        'pro' => [
+            'name' => 'Pro',
+            'price' => 49,
+            'max_activations' => 1,
+        ],
+        'business' => [
+            'name' => 'Business',
+            'price' => 149,
+            'max_activations' => 5,
+        ],
+    ],
+];
+```
+
+### Step 9: Seed Sample Data (Optional)
+
+```bash
+php artisan make:seeder ProductSeeder
+```
+
+**`database/seeders/ProductSeeder.php`:**
+```php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\Product;
+
+class ProductSeeder extends Seeder
+{
+    public function run()
+    {
+        Product::create([
+            'product_id' => 'ez-maintenance-pro',
+            'name' => 'Ez Maintenance Pro',
+            'description' => 'Professional maintenance mode plugin',
+            'active' => true,
+        ]);
+
+        Product::create([
+            'product_id' => 'ez-client-manager',
+            'name' => 'Ez IT Client Manager',
+            'description' => 'Complete client management solution',
+            'active' => true,
+        ]);
+    }
+}
+```
+
+Run seeder:
+```bash
+php artisan db:seed --class=ProductSeeder
+```
+
+---
+
 ## Deployment Checklist
 
 - [ ] Set up Laravel application on server
@@ -880,6 +1185,9 @@ class LicenseApiTest extends TestCase
 - [ ] Configure rate limiting
 - [ ] Test all endpoints
 - [ ] Set up admin dashboard (Laravel Nova/Filament)
+- [ ] Seed initial product data
+- [ ] Configure CORS if needed
+- [ ] Set up error tracking (Sentry/Bugsnag)
 
 ---
 

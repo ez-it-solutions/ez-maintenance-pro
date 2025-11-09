@@ -25,6 +25,7 @@ class EZMP_Admin {
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
         add_action('in_admin_header', [$this, 'hide_admin_notices'], 1000);
         add_filter('plugin_action_links_' . EZMP_PLUGIN_BASENAME, [$this, 'add_action_links']);
+        add_action('admin_bar_menu', [$this, 'add_admin_bar_menu'], 100);
     }
     
     /**
@@ -70,6 +71,65 @@ class EZMP_Admin {
     }
     
     /**
+     * Add admin bar menu
+     */
+    public function add_admin_bar_menu($wp_admin_bar) {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        
+        $is_active = EZMP_Core::is_active();
+        
+        // Add parent menu
+        $wp_admin_bar->add_node([
+            'id' => 'ez-maintenance-pro',
+            'title' => '<span class="ab-icon dashicons dashicons-admin-settings"></span><span class="ab-label">Ez Maintenance</span>' . 
+                       ($is_active ? ' <span class="ezmp-admin-bar-badge">ON</span>' : ''),
+            'href' => admin_url('admin.php?page=ez-maintenance-pro'),
+            'meta' => [
+                'class' => 'ezmp-admin-bar-menu',
+            ]
+        ]);
+        
+        // Add toggle submenu
+        $wp_admin_bar->add_node([
+            'id' => 'ezmp-toggle',
+            'parent' => 'ez-maintenance-pro',
+            'title' => '<span class="ezmp-admin-bar-toggle">' .
+                       '<span class="ezmp-toggle-label">Maintenance Mode</span>' .
+                       '<label class="ezmp-admin-bar-switch">' .
+                       '<input type="checkbox" id="ezmp-admin-bar-toggle" ' . checked($is_active, true, false) . '>' .
+                       '<span class="ezmp-admin-bar-slider"></span>' .
+                       '</label>' .
+                       '</span>',
+            'href' => '#',
+            'meta' => [
+                'onclick' => 'return false;',
+                'class' => 'ezmp-admin-bar-toggle-item'
+            ]
+        ]);
+        
+        // Add preview submenu
+        $wp_admin_bar->add_node([
+            'id' => 'ezmp-preview',
+            'parent' => 'ez-maintenance-pro',
+            'title' => 'Preview',
+            'href' => home_url('?ezmp_preview=1&nonce=' . wp_create_nonce('ezmp_preview')),
+            'meta' => [
+                'target' => '_blank'
+            ]
+        ]);
+        
+        // Add settings submenu
+        $wp_admin_bar->add_node([
+            'id' => 'ezmp-settings',
+            'parent' => 'ez-maintenance-pro',
+            'title' => 'Settings',
+            'href' => admin_url('admin.php?page=ez-maintenance-pro&tab=settings'),
+        ]);
+    }
+    
+    /**
      * Add action links to plugins page
      */
     public function add_action_links($links) {
@@ -104,6 +164,28 @@ class EZMP_Admin {
      * Enqueue admin assets
      */
     public function enqueue_admin_assets($hook) {
+        // Always enqueue admin bar styles
+        wp_enqueue_style(
+            'ezmp-admin-bar',
+            EZMP_PLUGIN_URL . 'assets/css/admin-bar.css',
+            [],
+            EZMP_VERSION
+        );
+        
+        wp_enqueue_script(
+            'ezmp-admin-bar',
+            EZMP_PLUGIN_URL . 'assets/js/admin-bar.js',
+            ['jquery'],
+            EZMP_VERSION,
+            true
+        );
+        
+        wp_localize_script('ezmp-admin-bar', 'ezmpAdminBar', [
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('ezmp_admin'),
+        ]);
+        
+        // Only enqueue full admin assets on plugin pages
         if (strpos($hook, 'ez-maintenance-pro') === false) {
             return;
         }
