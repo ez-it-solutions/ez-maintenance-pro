@@ -4,10 +4,21 @@
 #wpadminbar #wp-admin-bar-ez-maintenance-pro .ab-icon:before {
     content: "\f111";
     top: 2px;
+    color: #a3e635;
 }
 
 #wpadminbar #wp-admin-bar-ez-maintenance-pro .ab-label {
     margin-left: 5px;
+    font-weight: 600;
+}
+
+#wpadminbar #wp-admin-bar-ez-maintenance-pro > .ab-item {
+    background: rgba(163, 230, 53, 0.1);
+    border-left: 3px solid #a3e635;
+}
+
+#wpadminbar #wp-admin-bar-ez-maintenance-pro:hover > .ab-item {
+    background: rgba(163, 230, 53, 0.2);
 }
 
 /* Badge */
@@ -104,12 +115,20 @@
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* Hover states */
-#wpadminbar #wp-admin-bar-ez-maintenance-pro:hover > .ab-item {
-    background: rgba(255, 255, 255, 0.05);
-}
-
 /* Fix submenu width */
 #wpadminbar #wp-admin-bar-ez-maintenance-pro .ab-submenu {
     min-width: 220px;
+    background: #1a2332;
+    border-left: 3px solid #a3e635;
+}
+
+/* Submenu items */
+#wpadminbar #wp-admin-bar-ez-maintenance-pro .ab-submenu .ab-item {
+    color: #e2e8f0;
+    transition: all 0.2s;
+}
+
+#wpadminbar #wp-admin-bar-ez-maintenance-pro .ab-submenu li:hover > .ab-item {
+    background: rgba(163, 230, 53, 0.15);
+    color: #a3e635;
 }
