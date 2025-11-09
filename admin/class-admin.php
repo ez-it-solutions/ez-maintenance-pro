@@ -102,17 +102,6 @@ class EZMP_Admin {
             ]
         ]);
         
-        // Add Company Info submenu (separated)
-        $wp_admin_bar->add_node([
-            'id' => 'ezmp-company-info',
-            'parent' => 'ez-maintenance-pro',
-            'title' => 'Company Info',
-            'href' => admin_url('admin.php?page=ez-it-solutions'),
-            'meta' => [
-                'class' => 'ezmp-admin-bar-separator-item'
-            ]
-        ]);
-        
         // Add toggle submenu
         $wp_admin_bar->add_node([
             'id' => 'ezmp-toggle',
@@ -148,6 +137,17 @@ class EZMP_Admin {
             'parent' => 'ez-maintenance-pro',
             'title' => 'Settings',
             'href' => admin_url('admin.php?page=ez-maintenance-pro&tab=settings'),
+        ]);
+        
+        // Add Company Info footer
+        $wp_admin_bar->add_node([
+            'id' => 'ezmp-company-info',
+            'parent' => 'ez-maintenance-pro',
+            'title' => '<span class="dashicons dashicons-info"></span> Company Info',
+            'href' => admin_url('admin.php?page=ez-it-solutions'),
+            'meta' => [
+                'class' => 'ezmp-admin-bar-footer-item'
+            ]
         ]);
     }
     
