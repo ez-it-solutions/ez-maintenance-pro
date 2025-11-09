@@ -153,11 +153,24 @@
 #wpadminbar #wp-admin-bar-ez-maintenance-pro .ab-submenu .ab-item {
     color: #e2e8f0;
     transition: all 0.2s;
+    text-align: center;
+    font-size: 13px;
+    padding: 10px 15px;
 }
 
 #wpadminbar #wp-admin-bar-ez-maintenance-pro .ab-submenu li:hover > .ab-item {
     background: rgba(163, 230, 53, 0.15);
     color: #a3e635;
+}
+
+/* Style Preview and Settings links */
+#wpadminbar #wp-admin-bar-ezmp-preview > .ab-item,
+#wpadminbar #wp-admin-bar-ezmp-settings > .ab-item {
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 12px 15px !important;
+    text-align: center !important;
+    letter-spacing: 0.3px !important;
 }
 
 /* Footer item styling */
