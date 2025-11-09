@@ -143,7 +143,7 @@ class EZMP_Admin {
         $wp_admin_bar->add_node([
             'id' => 'ezmp-company-info',
             'parent' => 'ez-maintenance-pro',
-            'title' => '<span class="dashicons dashicons-info"></span> Company Info',
+            'title' => 'Company Info',
             'href' => admin_url('admin.php?page=ez-it-solutions'),
             'meta' => [
                 'class' => 'ezmp-admin-bar-footer-item'
