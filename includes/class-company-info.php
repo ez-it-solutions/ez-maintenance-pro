@@ -470,11 +470,16 @@ class EZIT_Company_Info {
     }
 }
 
+// Function is defined at the bottom of this file after class definition
+
 /**
  * Global function to render company info page
+ * Must be defined outside class so WordPress can call it
  */
-function ezit_render_company_info_page() {
-    EZIT_Company_Info::render_page();
+if (!function_exists('ezit_render_company_info_page')) {
+    function ezit_render_company_info_page() {
+        EZIT_Company_Info::render_page();
+    }
 }
 
 /**
