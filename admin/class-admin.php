@@ -51,10 +51,22 @@ class EZMP_Admin {
                 'Ez IT Solutions',
                 'manage_options',
                 $parent_slug,
-                '__return_null',
+                class_exists('EZIT_Company_Info') ? ['EZIT_Company_Info', 'render_page'] : '__return_null',
                 'dashicons-admin-site-alt3',
                 3
             );
+            
+            // Add Company Info as first submenu if class exists
+            if (class_exists('EZIT_Company_Info')) {
+                add_submenu_page(
+                    $parent_slug,
+                    'Company Info',
+                    'Company Info',
+                    'manage_options',
+                    $parent_slug,
+                    ['EZIT_Company_Info', 'render_page']
+                );
+            }
         }
         
         // Add Maintenance Pro as submenu
