@@ -46,16 +46,26 @@ class EZMP_Admin {
             }
         }
         
-        // If parent menu doesn't exist, create it
+        // Create parent menu if it doesn't exist
         if (!$parent_exists) {
             add_menu_page(
                 'Ez IT Solutions',
                 'Ez IT Solutions',
                 'manage_options',
                 $parent_slug,
-                '__return_null',
-                'dashicons-admin-network',
+                'ezit_render_company_info_page',
+                'dashicons-admin-site-alt3',
                 3
+            );
+            
+            // Add Company Info as first submenu (replaces duplicate parent)
+            add_submenu_page(
+                $parent_slug,
+                'Company Info',
+                'Company Info',
+                'manage_options',
+                $parent_slug,
+                'ezit_render_company_info_page'
             );
         }
         
