@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+if (!class_exists('EZIT_Company_Info')) {
 class EZIT_Company_Info {
     
     private static $instance = null;
@@ -666,3 +667,4 @@ add_action('wp_ajax_ezit_refresh_company_info', function() {
     EZIT_Company_Info::clear_cache();
     wp_send_json_success(['message' => 'Company information refreshed']);
 });
+} // End class_exists check

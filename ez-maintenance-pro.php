@@ -64,6 +64,10 @@ class Ez_Maintenance_Pro {
             require_once EZMP_PLUGIN_DIR . 'includes/class-company-info.php';
         }
         
+        // Load review notice
+        require_once EZMP_PLUGIN_DIR . 'includes/class-review-notice.php';
+        new EZIT_Review_Notice('ez-maintenance-pro', 'Ez Maintenance Pro');
+        
         if (is_admin()) {
             require_once EZMP_PLUGIN_DIR . 'admin/class-admin.php';
         }
