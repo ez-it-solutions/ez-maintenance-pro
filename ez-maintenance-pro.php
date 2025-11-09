@@ -58,7 +58,11 @@ class Ez_Maintenance_Pro {
         require_once EZMP_PLUGIN_DIR . 'includes/class-settings.php';
         require_once EZMP_PLUGIN_DIR . 'includes/class-api.php';
         require_once EZMP_PLUGIN_DIR . 'includes/class-license.php';
-        require_once EZMP_PLUGIN_DIR . 'includes/class-company-info.php';
+        
+        // Load company info only if file exists
+        if (file_exists(EZMP_PLUGIN_DIR . 'includes/class-company-info.php')) {
+            require_once EZMP_PLUGIN_DIR . 'includes/class-company-info.php';
+        }
         
         if (is_admin()) {
             require_once EZMP_PLUGIN_DIR . 'admin/class-admin.php';
@@ -86,7 +90,11 @@ class Ez_Maintenance_Pro {
         EZMP_Settings::init();
         EZMP_API::init();
         EZMP_License::init();
-        EZIT_Company_Info::init();
+        
+        // Initialize company info if class exists
+        if (class_exists('EZIT_Company_Info')) {
+            EZIT_Company_Info::init();
+        }
         
         if (is_admin()) {
             EZMP_Admin::init();
