@@ -265,6 +265,10 @@ class EZIT_Company_Info {
             .ezit-fullpage .updated,
             .ezit-fullpage .error {
                 display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                z-index: -9999 !important;
+                pointer-events: none !important;
             }
             
             /* Full page wrapper */
@@ -277,6 +281,7 @@ class EZIT_Company_Info {
                 overflow-y: auto;
                 padding: 20px;
                 transition: background-color 0.3s ease;
+                z-index: 9999;
             }
             
             .ezit-dark {
