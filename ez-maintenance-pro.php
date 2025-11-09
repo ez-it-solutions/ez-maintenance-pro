@@ -71,6 +71,7 @@ class Ez_Maintenance_Pro {
         register_deactivation_hook(__FILE__, [$this, 'deactivate']);
         
         add_action('plugins_loaded', [$this, 'init']);
+        add_action('admin_init', [$this, 'activation_redirect']);
     }
     
     /**
@@ -127,7 +128,27 @@ class Ez_Maintenance_Pro {
         // Flush rewrite rules
         flush_rewrite_rules();
         
+        // Set activation redirect flag
+        set_transient('ezmp_activation_redirect', true, 30);
+        
         do_action('ezmp_activated');
+    }
+    
+    /**
+     * Redirect to settings page on activation
+     */
+    public function activation_redirect() {
+        if (get_transient('ezmp_activation_redirect')) {
+            delete_transient('ezmp_activation_redirect');
+            
+            // Don't redirect if activating multiple plugins or doing bulk activation
+            if (isset($_GET['activate-multi'])) {
+                return;
+            }
+            
+            wp_safe_redirect(admin_url('admin.php?page=ez-maintenance-pro&tab=settings&welcome=1'));
+            exit;
+        }
     }
     
     /**

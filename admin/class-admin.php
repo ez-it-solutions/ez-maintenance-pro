@@ -30,14 +30,38 @@ class EZMP_Admin {
      * Add admin menu
      */
     public function add_admin_menu() {
-        add_menu_page(
+        // Check if Ez IT Solutions parent menu exists
+        global $menu;
+        $parent_exists = false;
+        
+        foreach ($menu as $item) {
+            if (isset($item[0]) && $item[0] === 'Ez IT Solutions') {
+                $parent_exists = true;
+                break;
+            }
+        }
+        
+        // If parent menu doesn't exist, create it
+        if (!$parent_exists) {
+            add_menu_page(
+                'Ez IT Solutions',
+                'Ez IT Solutions',
+                'manage_options',
+                'ez-it-solutions',
+                '__return_null',
+                'dashicons-admin-network',
+                3
+            );
+        }
+        
+        // Add as submenu under Ez IT Solutions
+        add_submenu_page(
+            'ez-it-solutions',
             'Ez Maintenance Pro',
-            'Maintenance',
+            'Maintenance Pro',
             'manage_options',
             'ez-maintenance-pro',
-            [$this, 'render_admin_page'],
-            'dashicons-admin-tools',
-            30
+            [$this, 'render_admin_page']
         );
     }
     
@@ -451,9 +475,31 @@ class EZMP_Admin {
      * Render Settings Tab
      */
     private function render_settings_tab() {
+        $is_welcome = isset($_GET['welcome']) && $_GET['welcome'] === '1';
         ?>
         <h2 class="ezmp-section-title">Advanced Settings</h2>
         <p class="ezmp-intro">Configure advanced options and integrations.</p>
+        
+        <?php if ($is_welcome): ?>
+            <div class="ezmp-card" style="border: 2px solid #a3e635; background: rgba(163, 230, 53, 0.1);">
+                <h3 style="color: #a3e635; display: flex; align-items: center; gap: 10px;">
+                    <span class="dashicons dashicons-yes-alt" style="font-size: 24px;"></span>
+                    Welcome to Ez Maintenance Pro!
+                </h3>
+                <p style="font-size: 1.1rem; margin-bottom: 20px;">Thank you for installing Ez Maintenance Pro. Here's how to get started:</p>
+                <ol style="line-height: 2; margin-left: 20px;">
+                    <li><strong>Choose a Template:</strong> Go to the Templates tab and select your preferred design</li>
+                    <li><strong>Customize Design:</strong> Set your brand colors and upload your logo in the Design tab</li>
+                    <li><strong>Edit Content:</strong> Customize the message your visitors will see in the Content tab</li>
+                    <li><strong>Configure Access:</strong> Set who can bypass maintenance mode in the Access tab</li>
+                    <li><strong>Activate:</strong> Toggle maintenance mode on the Dashboard when ready</li>
+                </ol>
+                <p style="margin-top: 20px;">
+                    <a href="?page=ez-maintenance-pro&tab=templates" class="button button-primary" style="margin-right: 10px;">Choose Template →</a>
+                    <a href="?page=ez-maintenance-pro&tab=dashboard" class="button">Go to Dashboard</a>
+                </p>
+            </div>
+        <?php endif; ?>
         
         <div class="ezmp-card">
             <h3>API Access</h3>
@@ -463,6 +509,10 @@ class EZMP_Admin {
                 <input type="text" value="<?php echo esc_attr(get_option('ezmp_api_key', '')); ?>" class="regular-text" readonly>
                 <button type="button" class="button" id="ezmp-generate-api-key">Generate New Key</button>
             </div>
+            <p style="margin-top: 15px; opacity: 0.8; font-size: 0.95rem;">
+                <span class="dashicons dashicons-info" style="color: #a3e635;"></span>
+                Use this API key to control maintenance mode remotely via REST API or Ez IT Client Manager.
+            </p>
         </div>
         
         <div class="ezmp-card">
