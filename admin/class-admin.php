@@ -24,6 +24,7 @@ class EZMP_Admin {
         add_action('admin_menu', [$this, 'add_admin_menu']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
         add_action('in_admin_header', [$this, 'hide_admin_notices'], 1000);
+        add_filter('plugin_action_links_' . EZMP_PLUGIN_BASENAME, [$this, 'add_action_links']);
     }
     
     /**
@@ -63,6 +64,26 @@ class EZMP_Admin {
             'ez-maintenance-pro',
             [$this, 'render_admin_page']
         );
+    }
+    
+    /**
+     * Add action links to plugins page
+     */
+    public function add_action_links($links) {
+        $plugin_links = [
+            '<a href="' . admin_url('admin.php?page=ez-maintenance-pro') . '">Dashboard</a>',
+            '<a href="' . admin_url('admin.php?page=ez-maintenance-pro&tab=settings') . '">Settings</a>',
+        ];
+        
+        // Add activation link if not activated
+        $license_key = get_option('ezmp_license_key', '');
+        if (empty($license_key)) {
+            $plugin_links[] = '<a href="' . admin_url('admin.php?page=ez-maintenance-pro&tab=settings#license') . '" style="color: #a3e635; font-weight: 600;">Activate License</a>';
+        } else {
+            $plugin_links[] = '<span style="color: #a3e635;">✓ Licensed</span>';
+        }
+        
+        return array_merge($plugin_links, $links);
     }
     
     /**
@@ -500,6 +521,71 @@ class EZMP_Admin {
                 </p>
             </div>
         <?php endif; ?>
+        
+        <div class="ezmp-card" id="license">
+            <?php
+            $license = EZMP_License::init();
+            $license_info = $license->get_license_info();
+            $is_active = $license->is_active();
+            ?>
+            <h3>License Activation</h3>
+            
+            <?php if ($is_active): ?>
+                <div style="background: rgba(163, 230, 53, 0.1); border: 1px solid rgba(163, 230, 53, 0.3); border-radius: 6px; padding: 20px; margin-bottom: 20px;">
+                    <p style="margin: 0; display: flex; align-items: center; gap: 10px; color: #a3e635; font-weight: 600;">
+                        <span class="dashicons dashicons-yes-alt"></span>
+                        License Active - <?php echo esc_html(ucfirst($license_info['plan'])); ?> Plan
+                    </p>
+                </div>
+                
+                <table class="widefat" style="margin-bottom: 20px;">
+                    <tr>
+                        <td style="width: 150px;"><strong>License Key:</strong></td>
+                        <td><?php echo esc_html(substr($license_info['key'], 0, 8) . '...' . substr($license_info['key'], -4)); ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email:</strong></td>
+                        <td><?php echo esc_html($license_info['email']); ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Plan:</strong></td>
+                        <td><?php echo esc_html(ucfirst($license_info['plan'])); ?></td>
+                    </tr>
+                    <?php if (!empty($license_info['expires'])): ?>
+                    <tr>
+                        <td><strong>Expires:</strong></td>
+                        <td><?php echo esc_html(date('F j, Y', strtotime($license_info['expires']))); ?></td>
+                    </tr>
+                    <?php endif; ?>
+                    <tr>
+                        <td><strong>Last Verified:</strong></td>
+                        <td><?php echo esc_html(human_time_diff($license_info['verified'])) . ' ago'; ?></td>
+                    </tr>
+                </table>
+                
+                <button type="button" class="button" id="ezmp-check-license">Check License Status</button>
+                <button type="button" class="button button-secondary" id="ezmp-deactivate-license">Deactivate License</button>
+                
+            <?php else: ?>
+                <p>Activate your license to unlock premium features, templates, and priority support.</p>
+                
+                <div class="ezmp-setting-item">
+                    <label>License Key</label>
+                    <input type="text" id="ezmp-license-key" class="regular-text" placeholder="Enter your license key">
+                </div>
+                
+                <div class="ezmp-setting-item">
+                    <label>Email Address</label>
+                    <input type="email" id="ezmp-license-email" class="regular-text" placeholder="your@email.com" value="<?php echo esc_attr(get_option('admin_email')); ?>">
+                </div>
+                
+                <button type="button" class="button button-primary" id="ezmp-activate-license">Activate License</button>
+                
+                <p style="margin-top: 20px;">
+                    <a href="https://www.ez-it-solutions.com/ez-maintenance-pro/pricing" target="_blank">Don't have a license? Get one here →</a>
+                </p>
+            <?php endif; ?>
+        </div>
         
         <div class="ezmp-card">
             <h3>API Access</h3>

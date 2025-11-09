@@ -181,6 +181,87 @@
                     }
                 });
             });
+            
+            // Activate License
+            $('#ezmp-activate-license').on('click', function() {
+                const $btn = $(this);
+                const licenseKey = $('#ezmp-license-key').val().trim();
+                const email = $('#ezmp-license-email').val().trim();
+                
+                if (!licenseKey) {
+                    EZMP_Admin.showNotice('Please enter a license key', 'error');
+                    return;
+                }
+                
+                $btn.prop('disabled', true).text('Activating...');
+                
+                $.post(ezmpAdmin.ajaxurl, {
+                    action: 'ezmp_activate_license',
+                    nonce: ezmpAdmin.nonce,
+                    license_key: licenseKey,
+                    email: email
+                }, function(response) {
+                    if (response.success) {
+                        EZMP_Admin.showNotice(response.data.message || 'License activated successfully!', 'success');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        EZMP_Admin.showNotice(response.data.message || 'License activation failed', 'error');
+                        $btn.prop('disabled', false).text('Activate License');
+                    }
+                });
+            });
+            
+            // Deactivate License
+            $('#ezmp-deactivate-license').on('click', function() {
+                if (!confirm('Are you sure you want to deactivate your license?')) {
+                    return;
+                }
+                
+                const $btn = $(this);
+                $btn.prop('disabled', true).text('Deactivating...');
+                
+                $.post(ezmpAdmin.ajaxurl, {
+                    action: 'ezmp_deactivate_license',
+                    nonce: ezmpAdmin.nonce
+                }, function(response) {
+                    if (response.success) {
+                        EZMP_Admin.showNotice('License deactivated successfully', 'success');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        EZMP_Admin.showNotice(response.data.message || 'Deactivation failed', 'error');
+                        $btn.prop('disabled', false).text('Deactivate License');
+                    }
+                });
+            });
+            
+            // Check License
+            $('#ezmp-check-license').on('click', function() {
+                const $btn = $(this);
+                $btn.prop('disabled', true).text('Checking...');
+                
+                $.post(ezmpAdmin.ajaxurl, {
+                    action: 'ezmp_check_license',
+                    nonce: ezmpAdmin.nonce
+                }, function(response) {
+                    if (response.success) {
+                        if (response.data.valid) {
+                            EZMP_Admin.showNotice('License is valid and active!', 'success');
+                        } else {
+                            EZMP_Admin.showNotice('License verification failed. Please check your license.', 'error');
+                        }
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        EZMP_Admin.showNotice('Could not verify license', 'error');
+                        $btn.prop('disabled', false).text('Check License Status');
+                    }
+                });
+            });
         },
         
         /**
