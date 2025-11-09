@@ -53,7 +53,7 @@ class EZMP_Admin {
                 'Ez IT Solutions',
                 'manage_options',
                 $parent_slug,
-                'ezit_render_company_info_page',
+                ['EZIT_Company_Info', 'render_page'],
                 'dashicons-admin-site-alt3',
                 3
             );
@@ -65,7 +65,7 @@ class EZMP_Admin {
                 'Company Info',
                 'manage_options',
                 $parent_slug,
-                'ezit_render_company_info_page'
+                ['EZIT_Company_Info', 'render_page']
             );
         }
         

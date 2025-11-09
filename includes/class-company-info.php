@@ -124,6 +124,7 @@ class EZIT_Company_Info {
     
     /**
      * Render company info page
+     * Made public static so it can be called as callback
      */
     public static function render_page() {
         $info = self::get_info();
