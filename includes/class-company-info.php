@@ -387,7 +387,7 @@ class EZIT_Company_Info {
                                                     <span class="dashicons dashicons-dismiss"></span> Deactivate
                                                 </a>
                                             <?php else: ?>
-                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=activate&plugin=' . urlencode($plugin['file'])), 'activate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-activate">
+                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=activate&plugin=' . urlencode($plugin['file'])), 'activate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-activate" onclick="return confirm('Activate <?php echo esc_js($plugin['name']); ?>?');">
                                                     <span class="dashicons dashicons-yes"></span> Activate
                                                 </a>
                                             <?php endif; ?>
@@ -678,22 +678,24 @@ class EZIT_Company_Info {
             .ezit-plugin-link {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
+                gap: 5px;
                 padding: 6px 12px;
-                background: transparent;
                 border: 1px solid #a3e635;
                 border-radius: 4px;
                 color: #a3e635;
                 text-decoration: none;
                 font-size: 13px;
                 font-weight: 600;
-                transition: all 0.2s ease;
+                transition: background 0.2s ease, color 0.2s ease;
+                background: transparent;
+                transform: none;
             }
             
             .ezit-plugin-link:hover {
                 background: #a3e635;
                 color: #0b0f12;
-                transform: translateY(-1px);
+                text-decoration: none;
+                transform: none;
             }
             
             .ezit-plugin-link .dashicons {

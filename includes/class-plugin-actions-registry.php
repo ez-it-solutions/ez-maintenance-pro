@@ -262,14 +262,16 @@ class EZIT_Plugin_Actions_Registry {
                     var $this = $(this);
                     $this.css({
                         'background': $this.data('hover-bg'),
-                        'color': $this.data('hover-color')
+                        'color': $this.data('hover-color'),
+                        'transform': 'none'
                     });
                 },
                 function() {
                     var $this = $(this);
                     $this.css({
                         'background': $this.data('bg'),
-                        'color': $this.data('color')
+                        'color': $this.data('color'),
+                        'transform': 'none'
                     });
                 }
             );
@@ -284,7 +286,12 @@ class EZIT_Plugin_Actions_Registry {
         }
         
         .ezit-custom-action {
-            transition: all 0.2s ease !important;
+            transition: background 0.2s ease, color 0.2s ease !important;
+            transform: none !important;
+        }
+        
+        .ezit-custom-action:hover {
+            transform: none !important;
         }
         </style>
         <?php
