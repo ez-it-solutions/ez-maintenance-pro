@@ -261,16 +261,24 @@ class EZIT_Plugin_Actions_Registry {
         jQuery(document).ready(function($) {
             $('.ezit-custom-action').on('mouseenter', function() {
                 var $this = $(this);
+                var hoverBg = $this.attr('data-hover-bg');
+                var hoverColor = $this.attr('data-hover-color');
+                
+                console.log('Hover BG:', hoverBg, 'Hover Color:', hoverColor);
+                
                 $this.css({
-                    'background': $this.data('hover-bg') + ' !important',
-                    'color': $this.data('hover-color') + ' !important',
+                    'background-color': hoverBg + ' !important',
+                    'color': hoverColor + ' !important',
                     'transform': 'none !important'
                 });
             }).on('mouseleave', function() {
                 var $this = $(this);
+                var bg = $this.attr('data-bg');
+                var color = $this.attr('data-color');
+                
                 $this.css({
-                    'background': $this.data('bg') + ' !important',
-                    'color': $this.data('color') + ' !important',
+                    'background-color': bg + ' !important',
+                    'color': color + ' !important',
                     'transform': 'none !important'
                 });
             });
