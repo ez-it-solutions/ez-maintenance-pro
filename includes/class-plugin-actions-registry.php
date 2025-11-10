@@ -153,16 +153,16 @@ class EZIT_Plugin_Actions_Registry {
         
         // Build inline styles
         $styles = [
-            'border-color: ' . $action['color'],
-            'color: ' . $action['color'],
-            'background: ' . $action['bg_color'],
-            'font-weight: ' . $action['font_weight'],
-            'font-size: ' . $action['font_size'],
-            'padding: ' . $action['padding'],
-            'border-width: ' . $action['border_width'],
-            'border-radius: ' . $action['border_radius'],
-            'transition: background 0.2s ease, color 0.2s ease',
-            'transform: none',
+            'border-color: ' . $action['color'] . ' !important',
+            'color: ' . $action['color'] . ' !important',
+            'background: ' . $action['bg_color'] . ' !important',
+            'font-weight: ' . $action['font_weight'] . ' !important',
+            'font-size: ' . $action['font_size'] . ' !important',
+            'padding: ' . $action['padding'] . ' !important',
+            'border-width: ' . $action['border_width'] . ' !important',
+            'border-radius: ' . $action['border_radius'] . ' !important',
+            'transition: background 0.2s ease, color 0.2s ease !important',
+            'transform: none !important',
         ];
         
         if (!empty($action['custom_style'])) {
@@ -259,24 +259,21 @@ class EZIT_Plugin_Actions_Registry {
         
         // Hover effects for custom actions
         jQuery(document).ready(function($) {
-            $('.ezit-custom-action').hover(
-                function() {
-                    var $this = $(this);
-                    $this.css({
-                        'background': $this.data('hover-bg'),
-                        'color': $this.data('hover-color'),
-                        'transform': 'none'
-                    });
-                },
-                function() {
-                    var $this = $(this);
-                    $this.css({
-                        'background': $this.data('bg'),
-                        'color': $this.data('color'),
-                        'transform': 'none'
-                    });
-                }
-            );
+            $('.ezit-custom-action').on('mouseenter', function() {
+                var $this = $(this);
+                $this.css({
+                    'background': $this.data('hover-bg') + ' !important',
+                    'color': $this.data('hover-color') + ' !important',
+                    'transform': 'none !important'
+                });
+            }).on('mouseleave', function() {
+                var $this = $(this);
+                $this.css({
+                    'background': $this.data('bg') + ' !important',
+                    'color': $this.data('color') + ' !important',
+                    'transform': 'none !important'
+                });
+            });
         });
         </script>
         <style>
