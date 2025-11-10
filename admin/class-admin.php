@@ -168,11 +168,6 @@ class EZMP_Admin {
             $plugin_links[] = '<span style="color: #10b981; font-weight: 600;">✓ Licensed</span>';
         }
         
-        // Add Backup NOW! link if backup system available
-        if (class_exists('EZIT_Backup_Core')) {
-            $plugin_links[] = '<a href="#" onclick="ezitBackupNowFromPlugins(\'ez-maintenance-pro\'); return false;" style="color: #f59e0b; font-weight: 600;">Backup NOW!</a>';
-        }
-        
         return array_merge($plugin_links, $links);
     }
     
@@ -264,24 +259,6 @@ class EZMP_Admin {
                             }
                         });
                     }
-                }
-                
-                function ezitBackupNowFromPlugins(slug) {
-                    if (!confirm('Create a backup now? This may take a few minutes.')) {
-                        return;
-                    }
-                    
-                    jQuery.post(ajaxurl, {
-                        action: 'ezit_backup_now',
-                        plugin_slug: slug,
-                        nonce: '<?php echo wp_create_nonce('ezit_backup_action'); ?>'
-                    }, function(response) {
-                        if (response.success) {
-                            alert('Backup created successfully!');
-                        } else {
-                            alert('Backup failed: ' + (response.data || 'Unknown error'));
-                        }
-                    });
                 }
                 </script>
                 <?php
