@@ -10,6 +10,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Load plugin actions registry
+if (file_exists(dirname(__FILE__) . '/class-plugin-actions-registry.php')) {
+    require_once dirname(__FILE__) . '/class-plugin-actions-registry.php';
+}
+
 if (!class_exists('EZIT_Company_Info')) {
 class EZIT_Company_Info {
     
@@ -22,6 +27,11 @@ class EZIT_Company_Info {
     public static function init() {
         add_action('wp_ajax_ezit_activate_license', [__CLASS__, 'ajax_activate_license']);
         add_action('wp_ajax_ezit_backup_now', [__CLASS__, 'ajax_backup_now']);
+        
+        // Fire action to allow plugins to register their actions
+        add_action('admin_init', function() {
+            do_action('ezit_register_plugin_actions');
+        });
     }
     
     /**
@@ -324,33 +334,43 @@ class EZIT_Company_Info {
                                         </div>
                                         <p><?php echo esc_html($plugin['description']); ?></p>
                                         
-                                        <div class="ezit-plugin-actions">
+                                        <div class="ezit-plugin-actions" onclick="event.stopPropagation();">
                                             <?php if (!empty($plugin['dashboard_url'])): ?>
-                                                <a href="<?php echo esc_url($plugin['dashboard_url']); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
+                                                <a href="<?php echo esc_url($plugin['dashboard_url']); ?>" class="ezit-plugin-link">
                                                     <span class="dashicons dashicons-dashboard"></span> Dashboard
                                                 </a>
                                             <?php endif; ?>
                                             
                                             <?php if (!empty($plugin['settings_url'])): ?>
-                                                <a href="<?php echo esc_url($plugin['settings_url']); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
+                                                <a href="<?php echo esc_url($plugin['settings_url']); ?>" class="ezit-plugin-link">
                                                     <span class="dashicons dashicons-admin-settings"></span> Settings
                                                 </a>
                                             <?php endif; ?>
                                             
-                                            <a href="#" class="ezit-plugin-link ezit-plugin-license" onclick="event.stopPropagation(); ezitActivateLicense('<?php echo esc_js($plugin['slug']); ?>', '<?php echo esc_js($plugin['name']); ?>'); return false;">
+                                            <a href="#" class="ezit-plugin-link ezit-plugin-license" onclick="ezitActivateLicense('<?php echo esc_js($plugin['slug']); ?>', '<?php echo esc_js($plugin['name']); ?>'); return false;">
                                                 <span class="dashicons dashicons-admin-network"></span> Activate License
                                             </a>
                                             
-                                            <a href="#" class="ezit-plugin-link ezit-plugin-backup" onclick="event.stopPropagation(); ezitBackupNow('<?php echo esc_js($plugin['slug']); ?>'); return false;">
+                                            <a href="#" class="ezit-plugin-link ezit-plugin-backup" onclick="ezitBackupNow('<?php echo esc_js($plugin['slug']); ?>'); return false;">
                                                 <span class="dashicons dashicons-database-export"></span> Backup NOW!
                                             </a>
                                             
+                                            <?php
+                                            // Render custom plugin actions
+                                            if (class_exists('EZIT_Plugin_Actions_Registry')) {
+                                                $custom_actions = EZIT_Plugin_Actions_Registry::get_actions($plugin['slug']);
+                                                foreach ($custom_actions as $action) {
+                                                    EZIT_Plugin_Actions_Registry::render_action($action, $plugin['slug']);
+                                                }
+                                            }
+                                            ?>
+                                            
                                             <?php if ($plugin['active']): ?>
-                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=deactivate&plugin=' . urlencode($plugin['file'])), 'deactivate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-deactivate" onclick="event.stopPropagation(); return confirm('Are you sure you want to deactivate <?php echo esc_js($plugin['name']); ?>?');">
+                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=deactivate&plugin=' . urlencode($plugin['file'])), 'deactivate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-deactivate" onclick="return confirm('Are you sure you want to deactivate <?php echo esc_js($plugin['name']); ?>?');">
                                                     <span class="dashicons dashicons-dismiss"></span> Deactivate
                                                 </a>
                                             <?php else: ?>
-                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=activate&plugin=' . urlencode($plugin['file'])), 'activate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-activate" onclick="event.stopPropagation();">
+                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=activate&plugin=' . urlencode($plugin['file'])), 'activate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-activate">
                                                     <span class="dashicons dashicons-yes"></span> Activate
                                                 </a>
                                             <?php endif; ?>
@@ -931,18 +951,6 @@ class EZIT_Company_Info {
                 } else {
                     alert('Backup failed: ' + (response.data || 'Unknown error'));
                 }
-            });
-        }
-        </script>
-        
-        <script>
-        jQuery(document).ready(function($) {
-            $('#ezit-refresh-info').on('click', function() {
-                const $btn = $(this);
-                $btn.prop('disabled', true).html('<span class="dashicons dashicons-update spin"></span> Refreshing...');
-                
-                $.post(ajaxurl, {
-                    action: 'ezit_refresh_company_info',
                     nonce: '<?php echo wp_create_nonce('ezit_refresh_info'); ?>'
                 }, function(response) {
                     if (response.success) {
