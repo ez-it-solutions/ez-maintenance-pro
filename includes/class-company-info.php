@@ -774,11 +774,20 @@ class EZIT_Company_Info {
             }
             
             .ezit-plugin-item.inactive {
+                opacity: 0.7;
                 border-left: 4px solid #ef4444;
             }
             
-            .ezit-plugin-item.inactive .ezit-plugin-description {
-                opacity: 0.7;
+            .ezit-plugin-item.inactive .ezit-plugin-badge {
+                opacity: 1;
+            }
+            
+            .ezit-plugin-item.inactive .ezit-plugin-version {
+                opacity: 1;
+            }
+            
+            .ezit-plugin-item.inactive .ezit-plugin-link {
+                opacity: 1;
             }
             
             .ezit-plugin-header {
