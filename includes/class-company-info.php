@@ -381,11 +381,11 @@ class EZIT_Company_Info {
                                             ?>
                                             
                                             <?php if ($plugin['active']): ?>
-                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=deactivate&plugin=' . urlencode($plugin['file'])), 'deactivate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-deactivate" onclick="return confirm('Are you sure you want to deactivate <?php echo esc_js($plugin['name']); ?>?');">
+                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=deactivate&plugin=' . urlencode($plugin['file']) . '&redirect=' . urlencode(admin_url('admin.php?page=ezit-company-info'))), 'deactivate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-deactivate" onclick="return ezitConfirm('Are you sure you want to deactivate <?php echo esc_js($plugin['name']); ?>?', this.href);">
                                                     <span class="dashicons dashicons-dismiss"></span> Deactivate
                                                 </a>
                                             <?php else: ?>
-                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=activate&plugin=' . urlencode($plugin['file'])), 'activate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-activate" onclick="return confirm('Activate <?php echo esc_js($plugin['name']); ?>?');">
+                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=activate&plugin=' . urlencode($plugin['file']) . '&redirect=' . urlencode(admin_url('admin.php?page=ezit-company-info'))), 'activate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-activate" onclick="return ezitConfirm('Activate <?php echo esc_js($plugin['name']); ?>?', this.href);">
                                                     <span class="dashicons dashicons-yes"></span> Activate
                                                 </a>
                                             <?php endif; ?>
@@ -745,11 +745,15 @@ class EZIT_Company_Info {
             .ezit-plugin-link.ezit-plugin-activate {
                 border-color: #10b981;
                 color: #10b981;
+                font-weight: 700;
+                padding: 8px 16px;
+                font-size: 14px;
             }
             
             .ezit-plugin-link.ezit-plugin-activate:hover {
                 background: #10b981;
                 color: white;
+                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
             }
             
             .ezit-plugin-item.active {
@@ -932,8 +936,148 @@ class EZIT_Company_Info {
         </style>
         
         <script>
-        // Placeholder for any custom scripts
+        // Custom confirmation modal
+        function ezitConfirm(message, url) {
+            // Create modal overlay
+            var overlay = jQuery('<div class="ezit-modal-overlay"></div>');
+            var modal = jQuery('<div class="ezit-modal"></div>');
+            var content = jQuery('<div class="ezit-modal-content"></div>');
+            var icon = jQuery('<div class="ezit-modal-icon"><span class="dashicons dashicons-warning"></span></div>');
+            var text = jQuery('<p class="ezit-modal-text"></p>').text(message);
+            var buttons = jQuery('<div class="ezit-modal-buttons"></div>');
+            var confirmBtn = jQuery('<button class="ezit-modal-btn ezit-modal-confirm">Confirm</button>');
+            var cancelBtn = jQuery('<button class="ezit-modal-btn ezit-modal-cancel">Cancel</button>');
+            
+            buttons.append(confirmBtn).append(cancelBtn);
+            content.append(icon).append(text).append(buttons);
+            modal.append(content);
+            overlay.append(modal);
+            jQuery('body').append(overlay);
+            
+            // Animate in
+            setTimeout(function() {
+                overlay.addClass('ezit-modal-active');
+            }, 10);
+            
+            // Handle confirm
+            confirmBtn.on('click', function() {
+                overlay.removeClass('ezit-modal-active');
+                setTimeout(function() {
+                    overlay.remove();
+                    window.location.href = url;
+                }, 200);
+            });
+            
+            // Handle cancel
+            cancelBtn.on('click', function() {
+                overlay.removeClass('ezit-modal-active');
+                setTimeout(function() {
+                    overlay.remove();
+                }, 200);
+            });
+            
+            // Handle overlay click
+            overlay.on('click', function(e) {
+                if (e.target === overlay[0]) {
+                    cancelBtn.click();
+                }
+            });
+            
+            return false;
+        }
         </script>
+        
+        <style>
+        .ezit-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .ezit-modal-overlay.ezit-modal-active {
+            opacity: 1;
+        }
+        
+        .ezit-modal {
+            background: #1a1f26;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: transform 0.2s ease;
+        }
+        
+        .ezit-modal-overlay.ezit-modal-active .ezit-modal {
+            transform: scale(1);
+        }
+        
+        .ezit-modal-content {
+            text-align: center;
+        }
+        
+        .ezit-modal-icon {
+            margin-bottom: 20px;
+        }
+        
+        .ezit-modal-icon .dashicons {
+            font-size: 48px;
+            width: 48px;
+            height: 48px;
+            color: #f59e0b;
+        }
+        
+        .ezit-modal-text {
+            color: #e5e7eb;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .ezit-modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .ezit-modal-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .ezit-modal-confirm {
+            background: #a3e635;
+            color: #0b0f12;
+        }
+        
+        .ezit-modal-confirm:hover {
+            background: #bef264;
+        }
+        
+        .ezit-modal-cancel {
+            background: #374151;
+            color: #e5e7eb;
+        }
+        
+        .ezit-modal-cancel:hover {
+            background: #4b5563;
+        }
+        </style>
         
         <?php
         // Enqueue custom action scripts
