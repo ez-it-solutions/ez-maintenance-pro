@@ -62,6 +62,7 @@ class Ez_Maintenance_Pro {
         // Load company info only if file exists
         if (file_exists(EZMP_PLUGIN_DIR . 'includes/class-company-info.php')) {
             require_once EZMP_PLUGIN_DIR . 'includes/class-company-info.php';
+            EZIT_Company_Info::init();
         }
         
         // Load review notice

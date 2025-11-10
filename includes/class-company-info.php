@@ -16,11 +16,12 @@ class EZIT_Company_Info {
     private static $instance = null;
     private static $api_url = 'https://www.ez-it-solutions.com/api/v1/company-info';
     
+    /**
+     * Initialize hooks
+     */
     public static function init() {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
+        add_action('wp_ajax_ezit_activate_license', [__CLASS__, 'ajax_activate_license']);
+        add_action('wp_ajax_ezit_backup_now', [__CLASS__, 'ajax_backup_now']);
     }
     
     /**
@@ -205,6 +206,63 @@ class EZIT_Company_Info {
     }
     
     /**
+     * Handle license activation via AJAX
+     */
+    public static function ajax_activate_license() {
+        check_ajax_referer('ezit_license_action', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Insufficient permissions');
+        }
+        
+        $plugin_slug = isset($_POST['plugin_slug']) ? sanitize_text_field($_POST['plugin_slug']) : '';
+        $license_key = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : '';
+        
+        if (empty($plugin_slug) || empty($license_key)) {
+            wp_send_json_error('Missing required fields');
+        }
+        
+        // Store license key
+        update_option('ezit_license_' . $plugin_slug, $license_key);
+        
+        // TODO: Validate with license server
+        // For now, just store it
+        
+        wp_send_json_success('License activated');
+    }
+    
+    /**
+     * Handle backup creation via AJAX
+     */
+    public static function ajax_backup_now() {
+        check_ajax_referer('ezit_backup_action', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Insufficient permissions');
+        }
+        
+        $plugin_slug = isset($_POST['plugin_slug']) ? sanitize_text_field($_POST['plugin_slug']) : '';
+        
+        // Check if backup system is available
+        if (class_exists('EZIT_Backup_Core')) {
+            $result = EZIT_Backup_Core::create_backup([
+                'type' => 'full',
+                'compression' => 'zip',
+                'storage' => ['local'],
+                'description' => 'Manual backup from Company Info page'
+            ]);
+            
+            if (is_wp_error($result)) {
+                wp_send_json_error($result->get_error_message());
+            } else {
+                wp_send_json_success('Backup created successfully');
+            }
+        } else {
+            wp_send_json_error('Backup system not available. Please install Ez IT Backup System plugin.');
+        }
+    }
+    
+    /**
      * Render company info page
      * Made public static so it can be called as callback
      */
@@ -266,20 +324,37 @@ class EZIT_Company_Info {
                                         </div>
                                         <p><?php echo esc_html($plugin['description']); ?></p>
                                         
-                                        <?php if (!empty($plugin['dashboard_url']) || !empty($plugin['settings_url'])): ?>
                                         <div class="ezit-plugin-actions">
                                             <?php if (!empty($plugin['dashboard_url'])): ?>
                                                 <a href="<?php echo esc_url($plugin['dashboard_url']); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
                                                     <span class="dashicons dashicons-dashboard"></span> Dashboard
                                                 </a>
                                             <?php endif; ?>
+                                            
                                             <?php if (!empty($plugin['settings_url'])): ?>
                                                 <a href="<?php echo esc_url($plugin['settings_url']); ?>" class="ezit-plugin-link" onclick="event.stopPropagation();">
                                                     <span class="dashicons dashicons-admin-settings"></span> Settings
                                                 </a>
                                             <?php endif; ?>
+                                            
+                                            <a href="#" class="ezit-plugin-link ezit-plugin-license" onclick="event.stopPropagation(); ezitActivateLicense('<?php echo esc_js($plugin['slug']); ?>', '<?php echo esc_js($plugin['name']); ?>'); return false;">
+                                                <span class="dashicons dashicons-admin-network"></span> Activate License
+                                            </a>
+                                            
+                                            <a href="#" class="ezit-plugin-link ezit-plugin-backup" onclick="event.stopPropagation(); ezitBackupNow('<?php echo esc_js($plugin['slug']); ?>'); return false;">
+                                                <span class="dashicons dashicons-database-export"></span> Backup NOW!
+                                            </a>
+                                            
+                                            <?php if ($plugin['active']): ?>
+                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=deactivate&plugin=' . urlencode($plugin['file'])), 'deactivate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-deactivate" onclick="event.stopPropagation(); return confirm('Are you sure you want to deactivate <?php echo esc_js($plugin['name']); ?>?');">
+                                                    <span class="dashicons dashicons-dismiss"></span> Deactivate
+                                                </a>
+                                            <?php else: ?>
+                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=activate&plugin=' . urlencode($plugin['file'])), 'activate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-activate" onclick="event.stopPropagation();">
+                                                    <span class="dashicons dashicons-yes"></span> Activate
+                                                </a>
+                                            <?php endif; ?>
                                         </div>
-                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -600,6 +675,46 @@ class EZIT_Company_Info {
                 color: white;
             }
             
+            .ezit-plugin-link.ezit-plugin-license {
+                border-color: #3b82f6;
+                color: #3b82f6;
+            }
+            
+            .ezit-plugin-link.ezit-plugin-license:hover {
+                background: #3b82f6;
+                color: white;
+            }
+            
+            .ezit-plugin-link.ezit-plugin-backup {
+                border-color: #f59e0b;
+                color: #f59e0b;
+            }
+            
+            .ezit-plugin-link.ezit-plugin-backup:hover {
+                background: #f59e0b;
+                color: white;
+            }
+            
+            .ezit-plugin-link.ezit-plugin-deactivate {
+                border-color: #ef4444;
+                color: #ef4444;
+            }
+            
+            .ezit-plugin-link.ezit-plugin-deactivate:hover {
+                background: #ef4444;
+                color: white;
+            }
+            
+            .ezit-plugin-link.ezit-plugin-activate {
+                border-color: #10b981;
+                color: #10b981;
+            }
+            
+            .ezit-plugin-link.ezit-plugin-activate:hover {
+                background: #10b981;
+                color: white;
+            }
+            
             .ezit-plugin-item.active {
                 border-left: 4px solid #a3e635;
             }
@@ -778,6 +893,47 @@ class EZIT_Company_Info {
                 }
             }
         </style>
+        
+        <script>
+        function ezitActivateLicense(slug, name) {
+            var key = prompt('Enter license key for ' + name + ':');
+            if (key && key.trim()) {
+                // Send AJAX request to activate license
+                jQuery.post(ajaxurl, {
+                    action: 'ezit_activate_license',
+                    plugin_slug: slug,
+                    license_key: key.trim(),
+                    nonce: '<?php echo wp_create_nonce('ezit_license_action'); ?>'
+                }, function(response) {
+                    if (response.success) {
+                        alert('License activated successfully!');
+                        location.reload();
+                    } else {
+                        alert('License activation failed: ' + (response.data || 'Unknown error'));
+                    }
+                });
+            }
+        }
+        
+        function ezitBackupNow(slug) {
+            if (!confirm('Create a backup now? This may take a few minutes.')) {
+                return;
+            }
+            
+            // Send AJAX request to create backup
+            jQuery.post(ajaxurl, {
+                action: 'ezit_backup_now',
+                plugin_slug: slug,
+                nonce: '<?php echo wp_create_nonce('ezit_backup_action'); ?>'
+            }, function(response) {
+                if (response.success) {
+                    alert('Backup created successfully!');
+                } else {
+                    alert('Backup failed: ' + (response.data || 'Unknown error'));
+                }
+            });
+        }
+        </script>
         
         <script>
         jQuery(document).ready(function($) {
