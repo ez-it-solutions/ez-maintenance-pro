@@ -78,6 +78,8 @@ class Ez_Maintenance_Pro {
                         'label' => 'Activate License',
                         'icon' => 'dashicons-admin-network',
                         'color' => '#3b82f6',
+                        'hover_bg' => '#3b82f6',
+                        'hover_color' => '#ffffff',
                         'ajax_action' => 'ezit_activate_license',
                         'ajax_nonce' => 'ezit_license_action',
                         'position' => 10,
