@@ -28,6 +28,20 @@ class EZIT_Company_Info {
         add_action('wp_ajax_ezit_activate_license', [__CLASS__, 'ajax_activate_license']);
         add_action('wp_ajax_ezit_submit_license', [__CLASS__, 'ajax_submit_license']);
         add_action('wp_ajax_ezit_backup_now', [__CLASS__, 'ajax_backup_now']);
+        
+        // Intercept plugin activation/deactivation redirects
+        add_filter('wp_redirect', [__CLASS__, 'redirect_after_plugin_action'], 10, 2);
+    }
+    
+    /**
+     * Redirect back to Company Info page after plugin activation/deactivation
+     */
+    public static function redirect_after_plugin_action($location, $status) {
+        // Check if we're on the plugins page and have our redirect parameter
+        if (isset($_GET['redirect']) && strpos($location, 'plugins.php') !== false) {
+            return esc_url_raw($_GET['redirect']);
+        }
+        return $location;
     }
     
     /**
