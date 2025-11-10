@@ -161,6 +161,8 @@ class EZIT_Plugin_Actions_Registry {
             'padding: ' . $action['padding'],
             'border-width: ' . $action['border_width'],
             'border-radius: ' . $action['border_radius'],
+            'transition: background 0.2s ease, color 0.2s ease',
+            'transform: none',
         ];
         
         if (!empty($action['custom_style'])) {
@@ -288,10 +290,12 @@ class EZIT_Plugin_Actions_Registry {
         .ezit-custom-action {
             transition: background 0.2s ease, color 0.2s ease !important;
             transform: none !important;
+            border-style: solid !important;
         }
         
         .ezit-custom-action:hover {
             transform: none !important;
+            text-decoration: none !important;
         }
         </style>
         <?php
