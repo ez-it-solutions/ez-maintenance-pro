@@ -347,16 +347,8 @@ class EZIT_Company_Info {
                                                 </a>
                                             <?php endif; ?>
                                             
-                                            <a href="#" class="ezit-plugin-link ezit-plugin-license" onclick="ezitActivateLicense('<?php echo esc_js($plugin['slug']); ?>', '<?php echo esc_js($plugin['name']); ?>'); return false;">
-                                                <span class="dashicons dashicons-admin-network"></span> Activate License
-                                            </a>
-                                            
-                                            <a href="#" class="ezit-plugin-link ezit-plugin-backup" onclick="ezitBackupNow('<?php echo esc_js($plugin['slug']); ?>'); return false;">
-                                                <span class="dashicons dashicons-database-export"></span> Backup NOW!
-                                            </a>
-                                            
                                             <?php
-                                            // Render custom plugin actions
+                                            // Render custom plugin actions from registry
                                             if (class_exists('EZIT_Plugin_Actions_Registry')) {
                                                 $custom_actions = EZIT_Plugin_Actions_Registry::get_actions($plugin['slug']);
                                                 foreach ($custom_actions as $action) {
@@ -915,49 +907,7 @@ class EZIT_Company_Info {
         </style>
         
         <script>
-        function ezitActivateLicense(slug, name) {
-            var key = prompt('Enter license key for ' + name + ':');
-            if (key && key.trim()) {
-                // Send AJAX request to activate license
-                jQuery.post(ajaxurl, {
-                    action: 'ezit_activate_license',
-                    plugin_slug: slug,
-                    license_key: key.trim(),
-                    nonce: '<?php echo wp_create_nonce('ezit_license_action'); ?>'
-                }, function(response) {
-                    if (response.success) {
-                        alert('License activated successfully!');
-                        location.reload();
-                    } else {
-                        alert('License activation failed: ' + (response.data || 'Unknown error'));
-                    }
-                });
-            }
-        }
-        
-        function ezitBackupNow(slug) {
-            if (!confirm('Create a backup now? This may take a few minutes.')) {
-                return;
-            }
-            
-            // Send AJAX request to create backup
-            jQuery.post(ajaxurl, {
-                action: 'ezit_backup_now',
-                plugin_slug: slug,
-                nonce: '<?php echo wp_create_nonce('ezit_backup_action'); ?>'
-            }, function(response) {
-                if (response.success) {
-                    alert('Backup created successfully!');
-                } else {
-                    alert('Backup failed: ' + (response.data || 'Unknown error'));
-                }
-                    nonce: '<?php echo wp_create_nonce('ezit_refresh_info'); ?>'
-                }, function(response) {
-                    if (response.success) {
-                        location.reload();
-                    } else {
-                        alert('Failed to refresh information');
-                        $btn.prop('disabled', false).html('<span class="dashicons dashicons-update"></span> Refresh Info');
+        // Placeholder for any custom scripts
                     }
                 });
             });
