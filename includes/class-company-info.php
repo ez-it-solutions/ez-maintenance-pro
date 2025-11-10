@@ -757,17 +757,16 @@ class EZIT_Company_Info {
             }
             
             .ezit-plugin-link.ezit-plugin-activate {
-                border-color: #10b981;
-                color: #10b981;
-                font-weight: 700;
-                padding: 8px 16px;
-                font-size: 14px;
+                border-color: #3b82f6 !important;
+                color: #3b82f6 !important;
+                background: transparent !important;
+                font-weight: 600 !important;
             }
             
             .ezit-plugin-link.ezit-plugin-activate:hover {
-                background: #10b981;
-                color: white;
-                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+                background: #3b82f6 !important;
+                color: white !important;
+                border-color: #3b82f6 !important;
             }
             
             .ezit-plugin-item.active {
@@ -775,6 +774,10 @@ class EZIT_Company_Info {
             }
             
             .ezit-plugin-item.inactive {
+                border-left: 4px solid #ef4444;
+            }
+            
+            .ezit-plugin-item.inactive .ezit-plugin-description {
                 opacity: 0.7;
             }
             
@@ -793,7 +796,7 @@ class EZIT_Company_Info {
             
             .ezit-plugin-version {
                 font-size: 0.9rem;
-                color: #666;
+                color: #d1d5db;
             }
             
             .ezit-plugin-badge {
@@ -805,12 +808,12 @@ class EZIT_Company_Info {
             
             .ezit-plugin-badge.active {
                 background: #a3e635;
-                color: #0b0f12;
+                color: #000000;
             }
             
             .ezit-plugin-badge.inactive {
-                background: #ccc;
-                color: #666;
+                background: #ef4444;
+                color: #ffffff;
             }
             
             .ezit-quick-links {
