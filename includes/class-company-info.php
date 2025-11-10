@@ -28,21 +28,34 @@ class EZIT_Company_Info {
         add_action('wp_ajax_ezit_activate_license', [__CLASS__, 'ajax_activate_license']);
         add_action('wp_ajax_ezit_submit_license', [__CLASS__, 'ajax_submit_license']);
         add_action('wp_ajax_ezit_backup_now', [__CLASS__, 'ajax_backup_now']);
-        
-        // Intercept plugin activation/deactivation redirects
-        add_filter('wp_redirect', [__CLASS__, 'redirect_after_plugin_action'], 10, 2);
+        add_action('wp_ajax_ezit_plugin_action', [__CLASS__, 'ajax_plugin_action']);
     }
     
     /**
-     * Redirect back to Company Info page after plugin activation/deactivation
+     * AJAX handler for plugin activation/deactivation
      */
-    public static function redirect_after_plugin_action($location, $status) {
-        // Check if this is our custom redirect
-        if (isset($_POST['ezit_redirect']) || isset($_GET['ezit_redirect'])) {
-            // Redirect to Company Info page
-            return admin_url('admin.php?page=ezit-company-info');
+    public static function ajax_plugin_action() {
+        check_ajax_referer('ezit_plugin_action', 'nonce');
+        
+        if (!current_user_can('activate_plugins')) {
+            wp_send_json_error('Insufficient permissions');
         }
-        return $location;
+        
+        $plugin_file = sanitize_text_field($_POST['plugin_file']);
+        $plugin_action = sanitize_text_field($_POST['plugin_action']);
+        
+        if ($plugin_action === 'activate') {
+            $result = activate_plugin($plugin_file);
+            if (is_wp_error($result)) {
+                wp_send_json_error($result->get_error_message());
+            }
+            wp_send_json_success('Plugin activated successfully');
+        } elseif ($plugin_action === 'deactivate') {
+            deactivate_plugins($plugin_file);
+            wp_send_json_success('Plugin deactivated successfully');
+        }
+        
+        wp_send_json_error('Invalid action');
     }
     
     /**
@@ -974,38 +987,30 @@ class EZIT_Company_Info {
                 // Show loading state
                 $element.css('opacity', '0.5').css('pointer-events', 'none');
                 
-                // Create form and submit
-                var form = jQuery('<form>', {
-                    method: 'POST',
-                    action: '<?php echo admin_url('plugins.php'); ?>'
+                // Use AJAX to activate/deactivate
+                jQuery.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'ezit_plugin_action',
+                        plugin_action: action,
+                        plugin_file: pluginFile,
+                        nonce: '<?php echo wp_create_nonce('ezit_plugin_action'); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Reload the page to show updated status
+                            window.location.reload();
+                        } else {
+                            alert('Error: ' + (response.data || 'Unknown error'));
+                            $element.css('opacity', '1').css('pointer-events', 'auto');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred. Please try again.');
+                        $element.css('opacity', '1').css('pointer-events', 'auto');
+                    }
                 });
-                
-                form.append(jQuery('<input>', {
-                    type: 'hidden',
-                    name: 'action',
-                    value: action
-                }));
-                
-                form.append(jQuery('<input>', {
-                    type: 'hidden',
-                    name: 'plugin',
-                    value: pluginFile
-                }));
-                
-                form.append(jQuery('<input>', {
-                    type: 'hidden',
-                    name: '_wpnonce',
-                    value: '<?php echo wp_create_nonce('bulk-plugins'); ?>'
-                }));
-                
-                form.append(jQuery('<input>', {
-                    type: 'hidden',
-                    name: 'ezit_redirect',
-                    value: '1'
-                }));
-                
-                jQuery('body').append(form);
-                form.submit();
             });
             
             return false;
