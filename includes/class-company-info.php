@@ -28,11 +28,6 @@ class EZIT_Company_Info {
         add_action('wp_ajax_ezit_activate_license', [__CLASS__, 'ajax_activate_license']);
         add_action('wp_ajax_ezit_submit_license', [__CLASS__, 'ajax_submit_license']);
         add_action('wp_ajax_ezit_backup_now', [__CLASS__, 'ajax_backup_now']);
-        
-        // Fire action to allow plugins to register their actions
-        add_action('admin_init', function() {
-            do_action('ezit_register_plugin_actions');
-        });
     }
     
     /**
@@ -373,8 +368,11 @@ class EZIT_Company_Info {
                                             <?php endif; ?>
                                             
                                             <?php
-                                            // Render custom plugin actions from registry
+                                            // Fire registration hook and render custom plugin actions from registry
                                             if (class_exists('EZIT_Plugin_Actions_Registry')) {
+                                                // Fire the registration hook to ensure all plugins have registered their actions
+                                                do_action('ezit_register_plugin_actions');
+                                                
                                                 $custom_actions = EZIT_Plugin_Actions_Registry::get_actions($plugin['slug']);
                                                 foreach ($custom_actions as $action) {
                                                     EZIT_Plugin_Actions_Registry::render_action($action, $plugin['slug']);
