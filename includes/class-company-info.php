@@ -37,9 +37,10 @@ class EZIT_Company_Info {
      * Redirect back to Company Info page after plugin activation/deactivation
      */
     public static function redirect_after_plugin_action($location, $status) {
-        // Check if we're on the plugins page and have our redirect parameter
-        if (isset($_GET['redirect']) && strpos($location, 'plugins.php') !== false) {
-            return esc_url_raw($_GET['redirect']);
+        // Check if we're redirecting from plugins.php and have our redirect parameter
+        if (isset($_GET['redirect']) && (strpos($location, 'plugins.php') !== false || strpos($_SERVER['REQUEST_URI'], 'plugins.php') !== false)) {
+            // Use menu_page_url to get the correct URL for our page
+            return menu_page_url('ezit-company-info', false);
         }
         return $location;
     }
