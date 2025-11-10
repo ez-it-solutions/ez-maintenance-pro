@@ -933,17 +933,20 @@ class EZIT_Company_Info {
         
         <script>
         // Placeholder for any custom scripts
-                    }
-                });
-            });
-        });
         </script>
+        
+        <?php
+        // Enqueue custom action scripts
+        if (class_exists('EZIT_Plugin_Actions_Registry')) {
+            EZIT_Plugin_Actions_Registry::enqueue_scripts();
+        }
+        ?>
+        
         <?php
         echo '</div>'; // Close ezit-fullpage wrapper
     }
 }
 
-// Function is defined at the bottom of this file after class definition
 
 /**
  * Global function to render company info page
