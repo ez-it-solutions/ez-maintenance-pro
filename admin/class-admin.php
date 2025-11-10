@@ -163,9 +163,14 @@ class EZMP_Admin {
         // Add activation link if not activated
         $license_key = get_option('ezmp_license_key', '');
         if (empty($license_key)) {
-            $plugin_links[] = '<a href="' . admin_url('admin.php?page=ez-maintenance-pro&tab=settings#license') . '" style="color: #a3e635; font-weight: 600;">Activate License</a>';
+            $plugin_links[] = '<a href="#" onclick="ezitActivateLicenseFromPlugins(\'ez-maintenance-pro\', \'Ez Maintenance Pro\'); return false;" style="color: #3b82f6; font-weight: 600;">Activate License</a>';
         } else {
-            $plugin_links[] = '<span style="color: #a3e635;">✓ Licensed</span>';
+            $plugin_links[] = '<span style="color: #10b981; font-weight: 600;">✓ Licensed</span>';
+        }
+        
+        // Add Backup NOW! link if backup system available
+        if (class_exists('EZIT_Backup_Core')) {
+            $plugin_links[] = '<a href="#" onclick="ezitBackupNowFromPlugins(\'ez-maintenance-pro\'); return false;" style="color: #f59e0b; font-weight: 600;">Backup NOW!</a>';
         }
         
         return array_merge($plugin_links, $links);
@@ -236,6 +241,54 @@ class EZMP_Admin {
      * Enqueue admin assets
      */
     public function enqueue_admin_assets($hook) {
+        // Enqueue on plugins page for action links
+        if ($hook === 'plugins.php') {
+            wp_enqueue_script('jquery');
+            add_action('admin_footer', function() {
+                ?>
+                <script>
+                function ezitActivateLicenseFromPlugins(slug, name) {
+                    var key = prompt('Enter license key for ' + name + ':');
+                    if (key && key.trim()) {
+                        jQuery.post(ajaxurl, {
+                            action: 'ezit_activate_license',
+                            plugin_slug: slug,
+                            license_key: key.trim(),
+                            nonce: '<?php echo wp_create_nonce('ezit_license_action'); ?>'
+                        }, function(response) {
+                            if (response.success) {
+                                alert('License activated successfully!');
+                                location.reload();
+                            } else {
+                                alert('License activation failed: ' + (response.data || 'Unknown error'));
+                            }
+                        });
+                    }
+                }
+                
+                function ezitBackupNowFromPlugins(slug) {
+                    if (!confirm('Create a backup now? This may take a few minutes.')) {
+                        return;
+                    }
+                    
+                    jQuery.post(ajaxurl, {
+                        action: 'ezit_backup_now',
+                        plugin_slug: slug,
+                        nonce: '<?php echo wp_create_nonce('ezit_backup_action'); ?>'
+                    }, function(response) {
+                        if (response.success) {
+                            alert('Backup created successfully!');
+                        } else {
+                            alert('Backup failed: ' + (response.data || 'Unknown error'));
+                        }
+                    });
+                }
+                </script>
+                <?php
+            });
+            return;
+        }
+        
         // Always enqueue admin bar styles
         wp_enqueue_style(
             'ezmp-admin-bar',
