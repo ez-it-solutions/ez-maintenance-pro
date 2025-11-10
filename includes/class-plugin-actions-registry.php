@@ -276,10 +276,13 @@ class EZIT_Plugin_Actions_Registry {
                 var bg = $this.attr('data-bg');
                 var color = $this.attr('data-color');
                 
+                console.log('Leave BG:', bg, 'Leave Color:', color);
+                
                 $this.css({
-                    'background-color': bg + ' !important',
-                    'color': color + ' !important',
-                    'transform': 'none !important'
+                    'background-color': bg,
+                    'background': bg,
+                    'color': color,
+                    'transform': 'none'
                 });
             });
         });
