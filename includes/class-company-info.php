@@ -37,10 +37,10 @@ class EZIT_Company_Info {
      * Redirect back to Company Info page after plugin activation/deactivation
      */
     public static function redirect_after_plugin_action($location, $status) {
-        // Check if we're redirecting from plugins.php and have our redirect parameter
-        if (isset($_GET['redirect']) && (strpos($location, 'plugins.php') !== false || strpos($_SERVER['REQUEST_URI'], 'plugins.php') !== false)) {
-            // Use menu_page_url to get the correct URL for our page
-            return menu_page_url('ezit-company-info', false);
+        // Check if this is our custom redirect
+        if (isset($_POST['ezit_redirect']) || isset($_GET['ezit_redirect'])) {
+            // Redirect to Company Info page
+            return admin_url('admin.php?page=ezit-company-info');
         }
         return $location;
     }
@@ -396,11 +396,11 @@ class EZIT_Company_Info {
                                             ?>
                                             
                                             <?php if ($plugin['active']): ?>
-                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=deactivate&plugin=' . urlencode($plugin['file']) . '&redirect=' . urlencode(admin_url('admin.php?page=ezit-company-info'))), 'deactivate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-deactivate" onclick="return ezitConfirm('Are you sure you want to deactivate <?php echo esc_js($plugin['name']); ?>?', this.href);">
+                                                <a href="#" class="ezit-plugin-link ezit-plugin-deactivate" data-plugin-file="<?php echo esc_attr($plugin['file']); ?>" data-action="deactivate" onclick="return ezitPluginAction(this, 'Are you sure you want to deactivate <?php echo esc_js($plugin['name']); ?>?');">
                                                     <span class="dashicons dashicons-dismiss"></span> Deactivate
                                                 </a>
                                             <?php else: ?>
-                                                <a href="<?php echo esc_url(wp_nonce_url(admin_url('plugins.php?action=activate&plugin=' . urlencode($plugin['file']) . '&redirect=' . urlencode(admin_url('admin.php?page=ezit-company-info'))), 'activate-plugin_' . $plugin['file'])); ?>" class="ezit-plugin-link ezit-plugin-activate" onclick="return ezitConfirm('Activate <?php echo esc_js($plugin['name']); ?>?', this.href);">
+                                                <a href="#" class="ezit-plugin-link ezit-plugin-activate" data-plugin-file="<?php echo esc_attr($plugin['file']); ?>" data-action="activate" onclick="return ezitPluginAction(this, 'Activate <?php echo esc_js($plugin['name']); ?>?');">
                                                     <span class="dashicons dashicons-yes"></span> Activate
                                                 </a>
                                             <?php endif; ?>
@@ -963,8 +963,56 @@ class EZIT_Company_Info {
         </style>
         
         <script>
+        // Handle plugin activation/deactivation with AJAX
+        function ezitPluginAction(element, message) {
+            var $element = jQuery(element);
+            var pluginFile = $element.data('plugin-file');
+            var action = $element.data('action');
+            
+            // Show confirmation modal
+            ezitConfirm(message, function() {
+                // Show loading state
+                $element.css('opacity', '0.5').css('pointer-events', 'none');
+                
+                // Create form and submit
+                var form = jQuery('<form>', {
+                    method: 'POST',
+                    action: '<?php echo admin_url('plugins.php'); ?>'
+                });
+                
+                form.append(jQuery('<input>', {
+                    type: 'hidden',
+                    name: 'action',
+                    value: action
+                }));
+                
+                form.append(jQuery('<input>', {
+                    type: 'hidden',
+                    name: 'plugin',
+                    value: pluginFile
+                }));
+                
+                form.append(jQuery('<input>', {
+                    type: 'hidden',
+                    name: '_wpnonce',
+                    value: '<?php echo wp_create_nonce('bulk-plugins'); ?>'
+                }));
+                
+                form.append(jQuery('<input>', {
+                    type: 'hidden',
+                    name: 'ezit_redirect',
+                    value: '1'
+                }));
+                
+                jQuery('body').append(form);
+                form.submit();
+            });
+            
+            return false;
+        }
+        
         // Custom confirmation modal
-        function ezitConfirm(message, url) {
+        function ezitConfirm(message, callback) {
             // Create modal overlay
             var overlay = jQuery('<div class="ezit-modal-overlay"></div>');
             var modal = jQuery('<div class="ezit-modal"></div>');
@@ -991,7 +1039,11 @@ class EZIT_Company_Info {
                 overlay.removeClass('ezit-modal-active');
                 setTimeout(function() {
                     overlay.remove();
-                    window.location.href = url;
+                    if (typeof callback === 'function') {
+                        callback();
+                    } else {
+                        window.location.href = callback;
+                    }
                 }, 200);
             });
             
