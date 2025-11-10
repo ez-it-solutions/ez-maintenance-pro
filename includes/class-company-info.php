@@ -26,6 +26,7 @@ class EZIT_Company_Info {
      */
     public static function init() {
         add_action('wp_ajax_ezit_activate_license', [__CLASS__, 'ajax_activate_license']);
+        add_action('wp_ajax_ezit_submit_license', [__CLASS__, 'ajax_submit_license']);
         add_action('wp_ajax_ezit_backup_now', [__CLASS__, 'ajax_backup_now']);
         
         // Fire action to allow plugins to register their actions
@@ -226,14 +227,38 @@ class EZIT_Company_Info {
         }
         
         $plugin_slug = isset($_POST['plugin_slug']) ? sanitize_text_field($_POST['plugin_slug']) : '';
+        $action_id = isset($_POST['action_id']) ? sanitize_text_field($_POST['action_id']) : '';
+        
+        // Prompt for license key via JavaScript
+        wp_send_json_success([
+            'prompt' => true,
+            'message' => 'Please enter your license key'
+        ]);
+    }
+    
+    /**
+     * Handle license key submission via AJAX
+     */
+    public static function ajax_submit_license() {
+        check_ajax_referer('ezit_license_action', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Insufficient permissions');
+        }
+        
+        $plugin_slug = isset($_POST['plugin_slug']) ? sanitize_text_field($_POST['plugin_slug']) : '';
         $license_key = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : '';
         
         if (empty($plugin_slug) || empty($license_key)) {
             wp_send_json_error('Missing required fields');
         }
         
-        // Store license key
-        update_option('ezit_license_' . $plugin_slug, $license_key);
+        // Store license key based on plugin
+        if ($plugin_slug === 'ez-maintenance-pro') {
+            update_option('ezmp_license_key', $license_key);
+        } else {
+            update_option('ezit_license_' . $plugin_slug, $license_key);
+        }
         
         // TODO: Validate with license server
         // For now, just store it

@@ -216,6 +216,28 @@ class EZIT_Plugin_Actions_Registry {
         ?>
         <script>
         function ezitCustomAction(pluginSlug, actionId, ajaxAction, nonceAction) {
+            // Special handling for license activation
+            if (ajaxAction === 'ezit_activate_license') {
+                var key = prompt('Enter license key:');
+                if (key && key.trim()) {
+                    jQuery.post(ajaxurl, {
+                        action: 'ezit_submit_license',
+                        plugin_slug: pluginSlug,
+                        license_key: key.trim(),
+                        nonce: '<?php echo wp_create_nonce('ezit_license_action'); ?>'
+                    }, function(response) {
+                        if (response.success) {
+                            alert('License activated successfully!');
+                            location.reload();
+                        } else {
+                            alert('License activation failed: ' + (response.data || 'Unknown error'));
+                        }
+                    });
+                }
+                return;
+            }
+            
+            // Regular AJAX action
             jQuery.post(ajaxurl, {
                 action: ajaxAction,
                 plugin_slug: pluginSlug,

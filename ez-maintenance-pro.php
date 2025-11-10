@@ -65,6 +65,38 @@ class Ez_Maintenance_Pro {
             EZIT_Company_Info::init();
         }
         
+        // Register plugin actions for Company Info page
+        add_action('ezit_register_plugin_actions', function() {
+            if (class_exists('EZIT_Plugin_Actions_Registry')) {
+                // Check if license is activated
+                $license_key = get_option('ezmp_license_key', '');
+                
+                if (empty($license_key)) {
+                    // Register Activate License action
+                    EZIT_Plugin_Actions_Registry::register_action('ez-maintenance-pro', [
+                        'id' => 'activate-license',
+                        'label' => 'Activate License',
+                        'icon' => 'dashicons-admin-network',
+                        'color' => '#3b82f6',
+                        'ajax_action' => 'ezit_activate_license',
+                        'ajax_nonce' => 'ezit_license_action',
+                        'position' => 10,
+                    ]);
+                } else {
+                    // Show licensed status
+                    EZIT_Plugin_Actions_Registry::register_action('ez-maintenance-pro', [
+                        'id' => 'licensed-status',
+                        'label' => '✓ Licensed',
+                        'type' => 'custom',
+                        'callback' => function() {
+                            echo '<span class="ezit-plugin-link" style="color: #10b981; font-weight: 600; cursor: default;">✓ Licensed</span>';
+                        },
+                        'position' => 10,
+                    ]);
+                }
+            }
+        });
+        
         // Load review notice
         require_once EZMP_PLUGIN_DIR . 'includes/class-review-notice.php';
         new EZIT_Review_Notice('ez-maintenance-pro', 'Ez Maintenance Pro');
